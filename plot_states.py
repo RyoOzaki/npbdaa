@@ -1,3 +1,4 @@
+#%%
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
@@ -5,6 +6,7 @@ import matplotlib.cm as cm
 from tqdm import tqdm
 from sklearn.metrics import adjusted_rand_score
 
+#%%
 def get_names():
     return np.loadtxt("files.txt", dtype=str)
 
@@ -23,7 +25,6 @@ def get_results(names, length):
     word_results = [np.loadtxt("results/" + name + "_s.txt").reshape((-1, l)) for name, l in zip(names, length)]
     dur_results = [np.loadtxt("results/" + name + "_d.txt").reshape((-1, l)) for name, l in zip(names, length)]
     return letter_results, word_results, dur_results
-    # return letter_results, word_results
 
 def _plot_discreate_sequence(true_data, title, sample_data, plotopts = {}, cmap = None, cmap2 = None):
         ax = plt.subplot2grid((10, 1), (1, 0))
@@ -54,8 +55,8 @@ l_results, w_results, d_results = get_results(names, length)
 concat_l_r = np.concatenate(l_results, axis=1)
 concat_w_r = np.concatenate(w_results, axis=1)
 
-L = 10
-S = 10
+L = 7
+S = 7
 T = l_results[0].shape[0]
 
 #%%
