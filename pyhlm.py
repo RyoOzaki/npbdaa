@@ -25,12 +25,14 @@ class WeakLimitHDPHLM(object):
         self._trans_distn = WeakLimitHDPHMMTransitions(**hypparams)
         self.states_list = []
 
-        word_set = set()
-        while len(word_set) < self.num_states:
+        word_list = []
+        for i in range(self.num_states):
             word = self.generate_word()
-            word_set.add(word)
+            if word in word_list:
+                word = self.generate_word()
+            word_list.append(word)
 
-        self.word_list = list(word_set)
+        self.word_list = word_list
         self.resample_dur_distns()
 
     @property
@@ -114,10 +116,10 @@ class WeakLimitHDPHLM(object):
                     (delayed(parallel._get_sampled_stateseq_norep_and_durations_censored)(idx)
                             for idx in range(len(joblib_args)))
 
-            for s, (stateseq_norep, durations_censored, log_likelihood) in zip(
+            for s, (stateseq, stateseq_norep, durations_censored, log_likelihood) in zip(
                     [s for grp in list_split(states_list,num_procs) for s in grp],
                     [seq for grp in raw_stateseqs for seq in grp]):
-                s._stateseq_norep, s._durations_censored, s._normalizer = stateseq_norep, durations_censored, log_likelihood
+                s.stateseq, s._stateseq_norep, s._durations_censored, s._normalizer = stateseq, stateseq_norep, durations_censored, log_likelihood
 
     def _get_joblib_pair(self,states_obj):
         return (states_obj.data,states_obj._kwargs)

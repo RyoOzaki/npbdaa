@@ -53,7 +53,7 @@ def _get_sampled_stateseq_norep_and_durations_censored(idx):
         model.add_data(data,initialize_from_prior=False,**kwargs)
         states_list.append(model.states_list.pop())
 
-    return [(s.stateseq_norep, s.durations_censored, s.log_likelihood()) for s in states_list]
+    return [(s.stateseq, s.stateseq_norep, s.durations_censored, s.log_likelihood()) for s in states_list]
 
 def _get_sampled_stateseq_and_labels(idx):
     grp = args[idx]
