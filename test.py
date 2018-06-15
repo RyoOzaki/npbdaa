@@ -65,7 +65,7 @@ datas = load_datas()
 #%% Pre training.
 for d in datas:
     letter_hsmm.add_data(d, trunc=60)
-for t in range(20):
+for t in trange(20):
     letter_hsmm.resample_model(num_procs=32)
 
 for d in datas:
