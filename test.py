@@ -34,8 +34,8 @@ def save_datas(states_list):
 
 #%%
 obs_dim = 3
-letter_upper = 7
-word_upper = 7
+letter_upper = 10
+word_upper = 10
 model_hypparams = {'num_states': word_upper, 'alpha': 10, 'gamma': 10, 'init_state_concentration': 10}
 obs_hypparams = {
     'mu_0':np.zeros(obs_dim),
@@ -65,7 +65,7 @@ datas = load_datas()
 #%% Pre training.
 for d in datas:
     letter_hsmm.add_data(d, trunc=60)
-for t in trange(20):
+for t in trange(50):
     letter_hsmm.resample_model(num_procs=32)
 
 for d in datas:
