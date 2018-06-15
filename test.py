@@ -67,6 +67,7 @@ for d in datas:
     letter_hsmm.add_data(d, trunc=60)
 for t in trange(50):
     letter_hsmm.resample_model(num_procs=32)
+letter_hsmm.states_list = []
 
 for d in datas:
     # letter_hsmm.add_data(d)
