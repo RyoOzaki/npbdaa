@@ -3,6 +3,7 @@ from pyhsmm.internals.hsmm_states import HSMMStatesEigen
 from pybasicbayes.distributions.poisson import Poisson
 from pyhsmm.util.stats import sample_discrete
 import numpy as np
+from scipy.misc import logsumexp
 
 class LetterHSMMState(HSMMStatesEigen):
 
@@ -39,7 +40,7 @@ class LetterHSMMState(HSMMStatesEigen):
             cumsum_aBl[:] = 0.0
             for t in cache_range:
                 cumsum_aBl[:t+1] += aBl[t+j+1, l]
-                alphal[t+j+1, j+1] = np.logaddexp.reduce(cumsum_aBl[:t+1] + alDl[t::-1, l] + alphal[j:t+j+1, j])
+                alphal[t+j+1, j+1] = logsumexp(cumsum_aBl[:t+1] + alDl[t::-1, l] + alphal[j:t+j+1, j])
         return alphal[:, -1]
 
     def reflect_letter_stateseq(self):
