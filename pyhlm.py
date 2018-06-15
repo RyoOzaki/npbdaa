@@ -379,7 +379,7 @@ class WeakLimitHDPHLMStates(object):
 
             stateseq_norep.append(state)
             durations_censored.append(dur)
-        self._stateseq_norep = np.array(stateseq_norep, dtyoe=np.int32)
+        self._stateseq_norep = np.array(stateseq_norep, dtype=np.int32)
         self._durations_censored = np.array(durations_censored, dtype=np.int32)
 
     def clear_caches(self):
