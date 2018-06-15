@@ -162,7 +162,7 @@ class WeakLimitHDPHLM(object):
 
             assert (np.exp(scores) >= 0).all(), cache_scores_matrix
             sampled_candi_idx = sample_discrete(np.exp(scores))
-            self.word_list[word_state] = candidates[sampled_candi_idx]
+            self.word_list[word_idx] = candidates[sampled_candi_idx]
 
     def resample_length_distn(self):
         self.length_distn.resample(np.array([len(word) for word in self.word_list]))
