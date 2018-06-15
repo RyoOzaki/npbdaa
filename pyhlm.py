@@ -352,26 +352,20 @@ class WeakLimitHDPHLMStates(object):
 
             state = sample_discrete(nextstate_dist)
             durprob = np.random.random()
-            dur = len(self.model.word_list[state])
+            # dur = len(self.model.word_list[state])
             cache_mess_term = np.exp(self.likelihood_block_word(t, T, self.model.word_list[state]) + betal[t:T, state] - betastarl[t, state])
 
-            while durprob > 0:
-                p_d_prior = aD[dur, state] if dur < T else 1.
+            dur = 0
+            while durprob > 0 and t+dur < T:
+                # p_d_prior = aD[dur, state] if t + dur < T else 1.
+                p_d_prior = aD[dur, state]
                 assert not np.isnan(p_d_prior)
                 assert p_d_prior >= 0
 
-                if p_d_prior == 0:
-                    dur += 1
-                    continue
-
-                if t + dur < T:
-                    p_d = cache_mess_term[dur] * p_d_prior
-                    assert not np.isnan(p_d)
-                    durprob -= p_d
-                    dur += 1
-                else:
-                    dur += 1
-                    break
+                p_d = cache_mess_term[dur] * p_d_prior
+                assert not np.isnan(p_d)
+                durprob -= p_d
+                dur += 1
 
             assert dur > 0
             assert dur >= len(self.model.word_list[state])

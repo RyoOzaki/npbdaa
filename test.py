@@ -26,7 +26,6 @@ def save_datas(states_list):
     names = np.loadtxt("files.txt", dtype=str)
     for i, s in enumerate(states_list):
         with open("results/" + names[i] + "_s.txt", "a") as f:
-            print(s.stateseq)
             np.savetxt(f, s.stateseq)
         with open("results/" + names[i] + "_l.txt", "a") as f:
             np.savetxt(f, s.letter_stateseq)
@@ -67,9 +66,9 @@ for d in datas:
     model.add_data(d, trunc=60, generate=False)
 
 #%%
-for t in trange(100):
+for t in trange(30):
     st = time.time()
     model.resample_model(num_procs=4)
     print("resample_model:{}".format(time.time() - st))
     save_datas(model.states_list)
-    # print(model.word_list)
+    print(model.word_list)
