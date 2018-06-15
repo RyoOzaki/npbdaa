@@ -55,8 +55,8 @@ l_results, w_results, d_results = get_results(names, length)
 concat_l_r = np.concatenate(l_results, axis=1)
 concat_w_r = np.concatenate(w_results, axis=1)
 
-L = 7
-S = 7
+L = 10
+S = 10
 T = l_results[0].shape[0]
 
 #%%
