@@ -321,7 +321,7 @@ class WeakLimitHDPHLMStates(object):
         alphal = np.ones((tsize, len_word)) * -np.inf
 
         if tsize-len_word+1 <= 0:
-            return alphal[-1, -1]
+            return alphal[:, -1]
 
         cumsum_aBl = np.empty(tsize-len_word+1)
         alphal[:tsize-len_word+1, 0] = np.cumsum(aBl[start:start+tsize-len_word+1, word[0]]) + alDl[:tsize-len_word+1, word[0]]
