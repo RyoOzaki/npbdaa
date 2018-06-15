@@ -23,6 +23,7 @@ def get_results(names, length):
     word_results = [np.loadtxt("results/" + name + "_s.txt").reshape((-1, l)) for name, l in zip(names, length)]
     dur_results = [np.loadtxt("results/" + name + "_d.txt").reshape((-1, l)) for name, l in zip(names, length)]
     return letter_results, word_results, dur_results
+    # return letter_results, word_results
 
 def _plot_discreate_sequence(true_data, title, sample_data, plotopts = {}, cmap = None, cmap2 = None):
         ax = plt.subplot2grid((10, 1), (1, 0))
@@ -49,6 +50,7 @@ concat_l_l = np.concatenate(l_labels, axis=0)
 concat_w_l = np.concatenate(w_labels, axis=0)
 
 l_results, w_results, d_results = get_results(names, length)
+# l_results, w_results = get_results(names, length)
 concat_l_r = np.concatenate(l_results, axis=1)
 concat_w_r = np.concatenate(w_results, axis=1)
 

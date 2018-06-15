@@ -26,6 +26,7 @@ def save_datas(states_list):
     names = np.loadtxt("files.txt", dtype=str)
     for i, s in enumerate(states_list):
         with open("results/" + names[i] + "_s.txt", "a") as f:
+            print(s.stateseq)
             np.savetxt(f, s.stateseq)
         with open("results/" + names[i] + "_l.txt", "a") as f:
             np.savetxt(f, s.letter_stateseq)
@@ -34,8 +35,8 @@ def save_datas(states_list):
 
 #%%
 obs_dim = 3
-letter_upper = 10
-word_upper = 10
+letter_upper = 7
+word_upper = 7
 model_hypparams = {'num_states': word_upper, 'alpha': 10, 'gamma': 10, 'init_state_concentration': 10}
 obs_hypparams = {
     'mu_0':np.zeros(obs_dim),
@@ -71,3 +72,4 @@ for t in trange(100):
     model.resample_model(num_procs=4)
     print("resample_model:{}".format(time.time() - st))
     save_datas(model.states_list)
+    # print(model.word_list)
