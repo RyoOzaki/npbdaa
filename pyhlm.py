@@ -294,11 +294,11 @@ class WeakLimitHDPHLMStates(object):
         normalizerl = 0.0
 
         for t in range(T-1, -1, -1):
-            betastarl[t] = logsumexp(
+            betastarl[t] = np.logaddexp.reduce(
                 betal[t:t+trunc] + self.cumulative_likelihoods(t, t+trunc) + aDl[:min(trunc, T-t)],
                 axis=0
             )
-            betal[t-1] = logsumexp(betastarl[t] + log_trans_matrix, axis=1)
+            betal[t-1] = np.logaddexp.reduce(betastarl[t] + log_trans_matrix, axis=1)
         betal[-1] = 0.0
         return betal, betastarl, normalizerl
 
@@ -330,7 +330,7 @@ class WeakLimitHDPHLMStates(object):
             cumsum_aBl[:] = 0.0
             for t in cache_range:
                 cumsum_aBl[:t+1] += aBl[start+t+j+1, l]
-                alphal[t+j+1, j+1] = logsumexp(cumsum_aBl[:t+1] + alDl[t::-1, l] + alphal[j:t+j+1, j])
+                alphal[t+j+1, j+1] = np.logaddexp.reduce(cumsum_aBl[:t+1] + alDl[t::-1, l] + alphal[j:t+j+1, j])
         return alphal[:, -1]
 
     def sample_forwards(self, betal, betastarl):

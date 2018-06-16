@@ -76,7 +76,7 @@ for d in datas:
 #%%
 for t in trange(100):
     st = time.time()
-    model.resample_model(num_procs=32)
+    model.resample_model(num_procs=24)
     print("resample_model:{}".format(time.time() - st))
     save_datas(model.states_list)
     print(model.word_list)
