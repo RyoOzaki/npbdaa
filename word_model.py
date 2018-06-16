@@ -28,12 +28,12 @@ class LetterHSMMState(HSMMStatesEigen):
         aBl = self.aBl
         alDl = self.aDl
         len_word = len(word)
-        alphal = np.ones((tsize, len_word)) * -np.inf
+        alphal = np.ones((tsize, len_word), dtype=np.float64) * -np.inf
 
         if tsize-len_word+1 <= 0:
             return alphal[:, -1]
 
-        cumsum_aBl = np.empty(tsize-len_word+1)
+        cumsum_aBl = np.empty(tsize-len_word+1, dtype=np.float64)
         alphal[:tsize-len_word+1, 0] = np.cumsum(aBl[:tsize-len_word+1, word[0]]) + alDl[:tsize-len_word+1, word[0]]
         cache_range = range(tsize - len_word + 1)
         for j, l in enumerate(word[1:]):

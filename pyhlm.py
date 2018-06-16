@@ -318,12 +318,12 @@ class WeakLimitHDPHLMStates(object):
         aBl = self.aBl
         alDl = self.alDl
         len_word = len(word)
-        alphal = np.ones((tsize, len_word)) * -np.inf
+        alphal = np.ones((tsize, len_word), dtype=np.float64) * -np.inf
 
         if tsize-len_word+1 <= 0:
             return alphal[:, -1]
 
-        cumsum_aBl = np.empty(tsize-len_word+1)
+        cumsum_aBl = np.empty(tsize-len_word+1, dtype=np.float64)
         alphal[:tsize-len_word+1, 0] = np.cumsum(aBl[start:start+tsize-len_word+1, word[0]]) + alDl[:tsize-len_word+1, word[0]]
         cache_range = range(tsize - len_word + 1)
         for j, l in enumerate(word[1:]):
@@ -344,10 +344,11 @@ class WeakLimitHDPHLMStates(object):
         stateseq_norep = []
         durations_censored = []
         t = 0
-        nextstate_unsmoothed = np.log(self.pi_0)
+        nextstate_unsmoothed = self.pi_0
         while t < T:
+            assert not np.isinf(betastarl[t]).all(), betastarl[t]
             logdomain = betastarl[t] - betastarl[t].max()
-            nextstate_dist = np.exp(logdomain + nextstate_unsmoothed)
+            nextstate_dist = np.exp(logdomain) * nextstate_unsmoothed
             if (nextstate_dist == 0.).all():
                 nextstate_dist = np.exp(logdomain)
 
