@@ -32,7 +32,7 @@ def save_datas(states_list, likelihood):
         with open("results/" + names[i] + "_d.txt", "a") as f:
             np.savetxt(f, unpack_durations(s.durations_censored))
     with open("results/log_likelihood.txt", "a") as f:
-        f.write(str(likelihood) + "\n")
+        f.write(str(likelihood))
 
 #%%
 obs_dim = 3
@@ -82,6 +82,7 @@ for t in trange(10):
     print("resample_model:{}".format(time.time() - st))
     save_datas(model.states_list, model.log_likelihood())
     print(model.word_list)
+    print("log_likelihood:{}".format(model.log_likelihood()))
 
 #%%
 model.letter_obs_distns[0].params

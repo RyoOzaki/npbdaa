@@ -105,10 +105,10 @@ class WeakLimitHDPHLM(object):
         self._clear_caches()
         times[3] = time.time() - st
 
-        print("Resample states:{}\n".format(times[0]))
-        print("Resample letter states:{}\n".format(times[1]))
-        print("SIR:{}\n".format(times[2]))
-        print("Resample others:{}\n".format(times[3]))
+        print("Resample states:{}".format(times[0]))
+        print("Resample letter states:{}".format(times[1]))
+        print("SIR:{}".format(times[2]))
+        print("Resample others:{}".format(times[3]))
 
     def resample_states(self, num_procs=0):
         if num_procs == 0:
