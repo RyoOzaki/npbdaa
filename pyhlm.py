@@ -25,10 +25,9 @@ class WeakLimitHDPHLM(object):
         self._trans_distn = WeakLimitHDPHMMTransitions(**hypparams)
         self.states_list = []
 
-        word_list = [None] * self.num_states
+        self.word_list = [None] * self.num_states
         for i in range(self.num_states):
-            word_list[i] = self._generate_word_and_set_at(i)
-            
+            self._generate_word_and_set_at(i)
         self.resample_dur_distns()
 
     @property
@@ -67,6 +66,9 @@ class WeakLimitHDPHLM(object):
     def letter_hsmm(self):
         return self._letter_hsmm
 
+    def log_likelihood(self):
+        return sum([word_state.log_likelihood() for word_state in self.states_list])
+
     def generate_word(self):
         size = self.length_distn.rvs() or 1
         return self.letter_hsmm.generate_word(size)
@@ -85,14 +87,28 @@ class WeakLimitHDPHLM(object):
         self.letter_hsmm.add_data(data, **kwargs)
 
     def resample_model(self, num_procs=0):
+        times = [0.] * 34
+        st = time.time()
         self.resample_states(num_procs=num_procs)
+        times[0] = time.time() - st
+        st = time.time()
         self.resample_letter_hsmm(num_procs=num_procs)
+        times[1] = time.time() - st
+        st = time.time()
         self.resample_words()
+        times[2] = time.time() - st
+        st = time.time()
         self.resample_length_distn()
         self.resample_dur_distns()
         self.resample_trans_distn()
         self.resample_init_state_distn()
         self._clear_caches()
+        times[3] = time.time() - st
+
+        print("Resample states:{}\n".format(times[0]))
+        print("Resample letter states:{}\n".format(times[1]))
+        print("SIR:{}\n".format(times[2]))
+        print("Resample others:{}\n".format(times[3]))
 
     def resample_states(self, num_procs=0):
         if num_procs == 0:
@@ -247,7 +263,12 @@ class WeakLimitHDPHLMStates(object):
             self._stateseq_norep, self._durations_censored = rle(self.stateseq)
         return self._durations_censored
 
+    # Be care full!!!!
+    # This method return the log likelihood which before resampling this model.
     def log_likelihood(self):
+        if self._normalizer is None:
+            _, _, normalizerl = self.messages_backwards()
+            self._normalizer = normalizerl
         return self._normalizer
 
     @property
@@ -300,6 +321,7 @@ class WeakLimitHDPHLMStates(object):
         aDl = self.aDl
         log_trans_matrix = self.log_trans_matrix
         T = self.T
+        pi_0 = self.pi_0
         trunc = self.trunc if self.trunc is not None else T
         betal = np.zeros((T, self.model.num_states), dtype=np.float64)
         betastarl = np.zeros((T, self.model.num_states), dtype=np.float64)
@@ -312,6 +334,7 @@ class WeakLimitHDPHLMStates(object):
             )
             betal[t-1] = np.logaddexp.reduce(betastarl[t] + log_trans_matrix, axis=1)
         betal[-1] = 0.0
+        normalierl = np.logaddexp.reduce(betastarl[0] + pi_0)
         return betal, betastarl, normalizerl
 
     def cumulative_likelihoods(self, start, stop):

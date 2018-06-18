@@ -51,9 +51,9 @@ class LetterHSMMState(HSMMStatesEigen):
         from pyhsmm.internals.hsmm_messages_interface import sample_forwards_log
         if self.left_censoring:
             raise NotImplementedError
-        caBl = np.vstack((np.zeros(betal.shape[1]),np.cumsum(self.aBl[:-1],axis=0)))
+        caBl = np.vstack((np.zeros(betal.shape[1]), np.cumsum(self.aBl[:-1],axis=0)))
         self.stateseq = sample_forwards_log(
-                self.trans_matrix,caBl,self.aDl,self.pi_0,betal,betastarl,
+                self.trans_matrix, caBl, self.aDl, self.pi_0, betal, betastarl,
                 np.empty(betal.shape[0],dtype='int32'))
         # assert not (0 == self.stateseq).all() #Remove this assertion.
 

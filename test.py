@@ -22,7 +22,7 @@ def unpack_durations(dur):
     unpacked[d-1] = 1.0
     return unpacked
 
-def save_datas(states_list):
+def save_datas(states_list, likelihood):
     names = np.loadtxt("files.txt", dtype=str)
     for i, s in enumerate(states_list):
         with open("results/" + names[i] + "_s.txt", "a") as f:
@@ -31,6 +31,8 @@ def save_datas(states_list):
             np.savetxt(f, s.letter_stateseq)
         with open("results/" + names[i] + "_d.txt", "a") as f:
             np.savetxt(f, unpack_durations(s.durations_censored))
+    with open("results/log_likelihood.txt", "a") as f:
+        f.write(str(likelihood) + "\n")
 
 #%%
 obs_dim = 3
@@ -65,7 +67,7 @@ datas = load_datas()
 #%% Pre training.
 for d in datas:
     letter_hsmm.add_data(d, trunc=60)
-for t in trange(1):
+for t in trange(10):
     letter_hsmm.resample_model(num_procs=4)
 letter_hsmm.states_list = []
 
@@ -74,11 +76,11 @@ for d in datas:
     model.add_data(d, trunc=60, generate=False)
 
 #%%
-for t in trange(1):
+for t in trange(10):
     st = time.time()
     model.resample_model(num_procs=4)
     print("resample_model:{}".format(time.time() - st))
-    save_datas(model.states_list)
+    save_datas(model.states_list, model.log_likelihood())
     print(model.word_list)
 
 #%%
