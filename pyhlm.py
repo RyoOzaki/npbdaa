@@ -67,7 +67,7 @@ class WeakLimitHDPHLM(object):
         return self._letter_hsmm
 
     def log_likelihood(self):
-        return sum([word_state.log_likelihood() for word_state in self.states_list])
+        return sum(word_state.log_likelihood() for word_state in self.states_list)
 
     def generate_word(self):
         size = self.length_distn.rvs() or 1
