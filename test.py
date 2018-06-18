@@ -62,21 +62,24 @@ model = WeakLimitHDPHLM(model_hypparams, letter_hsmm, dur_distns, length_distn)
 files = np.loadtxt("files.txt", dtype=str)
 datas = load_datas()
 
-# #%% Pre training.
-# for d in datas:
-#     letter_hsmm.add_data(d, trunc=60)
-# for t in trange(50):
-#     letter_hsmm.resample_model(num_procs=32)
-# letter_hsmm.states_list = []
+#%% Pre training.
+for d in datas:
+    letter_hsmm.add_data(d, trunc=60)
+for t in trange(1):
+    letter_hsmm.resample_model(num_procs=4)
+letter_hsmm.states_list = []
 
 for d in datas:
     # letter_hsmm.add_data(d)
     model.add_data(d, trunc=60, generate=False)
 
 #%%
-for t in trange(100):
+for t in trange(1):
     st = time.time()
-    model.resample_model(num_procs=24)
+    model.resample_model(num_procs=4)
     print("resample_model:{}".format(time.time() - st))
     save_datas(model.states_list)
     print(model.word_list)
+
+#%%
+model.letter_obs_distns[0].params

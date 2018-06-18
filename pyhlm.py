@@ -25,14 +25,10 @@ class WeakLimitHDPHLM(object):
         self._trans_distn = WeakLimitHDPHMMTransitions(**hypparams)
         self.states_list = []
 
-        word_list = []
+        word_list = [None] * self.num_states
         for i in range(self.num_states):
-            word = self.generate_word()
-            if word in word_list:
-                word = self.generate_word()
-            word_list.append(word)
-
-        self.word_list = word_list
+            word_list[i] = self._generate_word_and_set_at(i)
+            
         self.resample_dur_distns()
 
     @property
@@ -72,8 +68,15 @@ class WeakLimitHDPHLM(object):
         return self._letter_hsmm
 
     def generate_word(self):
-        size = self._length_distn.rvs() or 1
-        return self._letter_hsmm.generate_word(size)
+        size = self.length_distn.rvs() or 1
+        return self.letter_hsmm.generate_word(size)
+
+    def _generate_word_and_set_at(self, idx):
+        self.word_list[idx] = None
+        word = self.generate_word()
+        while word in self.word_list:
+            word = self.generate_word()
+        self.word_list[idx] = word
 
     def add_data(self, data, **kwargs):
         self.states_list.append(WeakLimitHDPHLMStates(self, data, **kwargs))
@@ -138,11 +141,7 @@ class WeakLimitHDPHLM(object):
             unique_candidates = list(set(candidates))
             ref_array = np.array([unique_candidates.index(candi) for candi in candidates])
             if len(candidates) == 0:
-                word = self.generate_word()
-                self.word_list[word_idx] = None
-                while word in self.word_list:
-                    word = self.generate_word()
-                self.word_list[word_idx] = word
+                self._generate_word_and_set_at(word_idx)
                 continue
             elif len(unique_candidates) == 1:
                 self.word_list[word_idx] = unique_candidates[0]
@@ -167,6 +166,16 @@ class WeakLimitHDPHLM(object):
             sampled_candi_idx = sample_discrete(np.exp(scores))
             self.word_list[word_idx] = candidates[sampled_candi_idx]
 
+        # Merge same letter seq which has different id.
+        for i, word in enumerate(self.word_list):
+            if word in self.word_list[:i]:
+                for word_state in self.states_list:
+                    existed_id = self.word_list[:i].index(word)
+                    stateseq, stateseq_norep = word_state.stateseq, word_state.stateseq_norep
+                    word_state.stateseq[stateseq == i] = existed_id
+                    word_state.stateseq_norep[stateseq_norep == i] = existed_id
+                    self._generate_word_and_set_at(i)
+
     def resample_length_distn(self):
         self.length_distn.resample(np.array([len(word) for word in self.word_list]))
 
@@ -184,6 +193,9 @@ class WeakLimitHDPHLM(object):
     def _clear_caches(self):
         for word_state in self.states_list:
             word_state.clear_caches()
+
+    def params(self):
+        self.trans_distn.params()
 
 class WeakLimitHDPHLMStates(object):
 
@@ -346,7 +358,6 @@ class WeakLimitHDPHLMStates(object):
         t = 0
         nextstate_unsmoothed = self.pi_0
         while t < T:
-            assert not np.isinf(betastarl[t]).all(), betastarl[t]
             logdomain = betastarl[t] - betastarl[t].max()
             nextstate_dist = np.exp(logdomain) * nextstate_unsmoothed
             if (nextstate_dist == 0.).all():
