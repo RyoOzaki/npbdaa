@@ -81,9 +81,16 @@ for i, name in enumerate(tqdm(names)):
 for t in range(T):
     letter_ARI[t] = adjusted_rand_score(concat_l_l, concat_l_r[t])
     word_ARI[t] = adjusted_rand_score(concat_w_l, concat_w_r[t])
+log_likelihood = np.loadtxt("results/log_likelihood.txt")
 
 #%% plot ARIs.
+plt.title("Letter ARI")
 plt.plot(range(T), letter_ARI, ".-")
 
 #%%
+plt.title("Word ARI")
 plt.plot(range(T), word_ARI, ".-")
+
+#%%
+plt.title("Log likelihood")
+plt.plot(range(T), log_likelihood, ".-")
