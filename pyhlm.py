@@ -334,7 +334,7 @@ class WeakLimitHDPHLMStates(object):
             )
             betal[t-1] = np.logaddexp.reduce(betastarl[t] + log_trans_matrix, axis=1)
         betal[-1] = 0.0
-        normalierl = np.logaddexp.reduce(betastarl[0] + pi_0)
+        normalierl = np.logaddexp.reduce(betastarl[0] + np.log(pi_0))
         return betal, betastarl, normalizerl
 
     def cumulative_likelihoods(self, start, stop):
