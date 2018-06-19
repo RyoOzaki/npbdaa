@@ -91,13 +91,17 @@ class WeakLimitHDPHLM(object):
         st = time.time()
         self.resample_states(num_procs=num_procs)
         times[0] = time.time() - st
+        self.letter_hsmm.states_list = []
+        [word_state.add_word_datas(generate=False) for word_state in self.states_list]
         st = time.time()
-        self.resample_letter_hsmm(num_procs=num_procs)
+        self.letter_hsmm.resample_states(num_procs=num_procs)
         times[1] = time.time() - st
+        [letter_state.reflect_letter_stateseq() for letter_state in self.letter_hsmm.states_list]
         st = time.time()
         self.resample_words()
         times[2] = time.time() - st
         st = time.time()
+        self.letter_hsmm.resample_parameters()
         self.resample_length_distn()
         self.resample_dur_distns()
         self.resample_trans_distn()
@@ -141,13 +145,6 @@ class WeakLimitHDPHLM(object):
 
     def _get_joblib_pair(self,states_obj):
         return (states_obj.data,states_obj._kwargs)
-
-    def resample_letter_hsmm(self, num_procs=0):
-        self.letter_hsmm.states_list = []
-        [word_state.add_word_datas(generate=False) for word_state in self.states_list]
-        self.letter_hsmm.resample_states(num_procs=num_procs)
-        self.letter_hsmm.resample_parameters()
-        [letter_state.reflect_letter_stateseq() for letter_state in self.letter_hsmm.states_list]
 
     def resample_words(self):
         for word_idx in range(self.num_states):
