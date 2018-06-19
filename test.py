@@ -32,9 +32,13 @@ def save_datas(states_list, likelihood):
         with open("results/" + names[i] + "_d.txt", "a") as f:
             np.savetxt(f, unpack_durations(s.durations_censored))
     with open("results/log_likelihood.txt", "a") as f:
-        f.write(str(likelihood))
+        f.write(str(likelihood) + "\n")
 
 #%%
+thread_num = 4
+pre_train_iter = 0
+train_iter = 100
+trunc = 60
 obs_dim = 3
 letter_upper = 10
 word_upper = 10
@@ -66,23 +70,20 @@ datas = load_datas()
 
 #%% Pre training.
 for d in datas:
-    letter_hsmm.add_data(d, trunc=60)
-for t in trange(10):
-    letter_hsmm.resample_model(num_procs=4)
+    letter_hsmm.add_data(d, trunc=trunc)
+for t in trange(pre_train_iter):
+    letter_hsmm.resample_model(num_procs=thread_num)
 letter_hsmm.states_list = []
 
 for d in datas:
     # letter_hsmm.add_data(d)
-    model.add_data(d, trunc=60, generate=False)
+    model.add_data(d, trunc=trunc, generate=False)
 
 #%%
-for t in trange(10):
+for t in trange(train_iter):
     st = time.time()
-    model.resample_model(num_procs=4)
+    model.resample_model(num_procs=thread_num)
     print("resample_model:{}".format(time.time() - st))
     save_datas(model.states_list, model.log_likelihood())
     print(model.word_list)
     print("log_likelihood:{}".format(model.log_likelihood()))
-
-#%%
-model.letter_obs_distns[0].params
