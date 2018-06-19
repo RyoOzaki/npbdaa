@@ -22,9 +22,13 @@ def unpack_durations(dur):
     unpacked[d-1] = 1.0
     return unpacked
 
-def save_datas(states_list, likelihood):
+def save_datas(itr_idx, model):
+    # Save parameters
+    with open("parameters/ITR:{0:04d}.txt".format(itr_idx), "w") as f:
+        f.write(str(model.params))
+    # Save sampled states sequences.
     names = np.loadtxt("files.txt", dtype=str)
-    for i, s in enumerate(states_list):
+    for i, s in enumerate(model.states_list):
         with open("results/" + names[i] + "_s.txt", "a") as f:
             np.savetxt(f, s.stateseq)
         with open("results/" + names[i] + "_l.txt", "a") as f:
@@ -32,7 +36,7 @@ def save_datas(states_list, likelihood):
         with open("results/" + names[i] + "_d.txt", "a") as f:
             np.savetxt(f, unpack_durations(s.durations_censored))
     with open("results/log_likelihood.txt", "a") as f:
-        f.write(str(likelihood) + "\n")
+        f.write(str(model.log_likelihood()) + "\n")
 
 #%%
 thread_num = 4
@@ -75,15 +79,26 @@ for t in trange(pre_train_iter):
     letter_hsmm.resample_model(num_procs=thread_num)
 letter_hsmm.states_list = []
 
+#%%
+print("Add datas...")
 for d in datas:
-    # letter_hsmm.add_data(d)
     model.add_data(d, trunc=trunc, generate=False)
+model.resample_states(num_procs=thread_num)
+# # or
+# for d in datas:
+#     model.add_data(d, trunc=trunc, initialize_from_prior=False)
+print("Done!")
+
+#%% Save init params and pyper params
+with open("parameters/hypparams.txt", "w") as f:
+    f.write(str(model.hypparams))
+save_datas(0, model)
 
 #%%
 for t in trange(train_iter):
     st = time.time()
     model.resample_model(num_procs=thread_num)
     print("resample_model:{}".format(time.time() - st))
-    save_datas(model.states_list, model.log_likelihood())
+    save_datas(t+1, model)
     print(model.word_list)
     print("log_likelihood:{}".format(model.log_likelihood()))
