@@ -87,7 +87,7 @@ class WeakLimitHDPHLM(object):
         self.letter_hsmm.add_data(data, **kwargs)
 
     def resample_model(self, num_procs=0):
-        times = [0.] * 34
+        times = [0.] * 4
         st = time.time()
         self.resample_states(num_procs=num_procs)
         times[0] = time.time() - st
@@ -112,10 +112,9 @@ class WeakLimitHDPHLM(object):
 
     def resample_states(self, num_procs=0):
         if num_procs == 0:
-            for word_state in self.states_list:
-                word_state.resample()
+            [word_state.resample() for word_state in self.states_list]
         else:
-            self._joblib_resample_states(self.states_list,num_procs)
+            self._joblib_resample_states(self.states_list, num_procs)
 
     def _joblib_resample_states(self,states_list,num_procs):
         from joblib import Parallel, delayed
@@ -215,7 +214,7 @@ class WeakLimitHDPHLM(object):
 
 class WeakLimitHDPHLMStates(object):
 
-    def __init__(self, model, data=None, trunc=None, generate=True, initialize_from_prior=True):
+    def __init__(self, model, data=None, trunc=None, generate=True, initialize_from_prior=False):
         self.model = model
         self.data = data
         self.T = T = len(data)
