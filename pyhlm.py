@@ -66,6 +66,20 @@ class WeakLimitHDPHLM(object):
     def letter_hsmm(self):
         return self._letter_hsmm
 
+    @property
+    def params(self):
+        letter_hsmm_params = self.letter_hsmm.params
+        bigram_params = {**self.init_state_distn.params, "trans_matrix": self.trans_distn.trans_matrix}
+        length_params = self.length_distn.params
+        return {"num_states": self.num_states, "word_list": self.word_list, "letter_hsmm": letter_hsmm_params, "word_length": length_params, "bigram": bigram_params}
+
+    @property
+    def hypparams(self):
+        letter_hsmm_hypparams = self.letter_hsmm.hypparams
+        bigram_hypparams = self.init_state_distn.hypparams
+        length_hypparams = self.length_distn.hypparams
+        return {"letter_hsmm": letter_hsmm_hypparams, "word_length": length_hypparams, "bigram": bigram_hypparams}
+
     def log_likelihood(self):
         return sum(word_state.log_likelihood() for word_state in self.states_list)
 
@@ -88,9 +102,6 @@ class WeakLimitHDPHLM(object):
 
     def resample_model(self, num_procs=0):
         times = [0.] * 4
-        st = time.time()
-        self.resample_states(num_procs=num_procs)
-        times[0] = time.time() - st
         self.letter_hsmm.states_list = []
         [word_state.add_word_datas(generate=False) for word_state in self.states_list]
         st = time.time()
@@ -106,8 +117,11 @@ class WeakLimitHDPHLM(object):
         self.resample_dur_distns()
         self.resample_trans_distn()
         self.resample_init_state_distn()
-        self._clear_caches()
         times[3] = time.time() - st
+        st = time.time()
+        self.resample_states(num_procs=num_procs)
+        times[0] = time.time() - st
+        self._clear_caches()
 
         print("Resample states:{}".format(times[0]))
         print("Resample letter states:{}".format(times[1]))
@@ -206,8 +220,6 @@ class WeakLimitHDPHLM(object):
         for word_state in self.states_list:
             word_state.clear_caches()
 
-    def params(self):
-        self.trans_distn.params()
 
 class WeakLimitHDPHLMStates(object):
 
