@@ -71,8 +71,14 @@ class LetterHSMM(WeakLimitHDPHSMM):
 
     @property
     def params(self):
-        pass
+        obs_params = {"obs_distn({})".format(idx): obs_distn.params for idx, obs_distn in enumerate(self.obs_distns)}
+        dur_params = {"dur_distn({})".format(idx): dur_distn.params for idx, dur_distn in enumerate(self.dur_distns)}
+        bigram_params = {**self.init_state_distn.params, "trans_matrix":self.trans_distn.trans_matrix}
+        return {"num_states": self.num_states, "obs_distns": obs_params, "dur_distns": dur_params, "bigram": bigram_params}
 
     @property
     def hypparams(self):
-        pass
+        obs_hypparams = {"obs_distn({})".format(idx): obs_distn.hypparams for idx, obs_distn in enumerate(self.obs_distns)}
+        dur_hypparams = {"dur_distn({})".format(idx): dur_distn.hypparams for idx, dur_distn in enumerate(self.dur_distns)}
+        bigram_hypparams = self.init_state_distn.hypparams
+        return {"obs_distns": obs_hypparams, "dur_distns": dur_hypparams, "bigram": bigram_hypparams}
