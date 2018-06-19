@@ -68,3 +68,11 @@ class LetterHSMM(WeakLimitHDPHSMM):
             word[idx] = sample_discrete(nextstate_distn)
             nextstate_distn = A[word[idx]]
         return tuple(word)
+
+    @property
+    def params(self):
+        pass
+
+    @property
+    def hypparams(self):
+        pass
