@@ -22,10 +22,7 @@ def unpack_durations(dur):
     unpacked[d-1] = 1.0
     return unpacked
 
-def save_datas(itr_idx, model):
-    # Save parameters
-    with open("parameters/ITR:{0:04d}.txt".format(itr_idx), "w") as f:
-        f.write(str(model.params))
+def save_stateseq(model):
     # Save sampled states sequences.
     names = np.loadtxt("files.txt", dtype=str)
     for i, s in enumerate(model.states_list):
@@ -35,6 +32,12 @@ def save_datas(itr_idx, model):
             np.savetxt(f, s.letter_stateseq)
         with open("results/" + names[i] + "_d.txt", "a") as f:
             np.savetxt(f, unpack_durations(s.durations_censored))
+
+def save_params(itr_idx, model):
+    with open("parameters/ITR_{0:04d}.txt".format(itr_idx), "w") as f:
+        f.write(str(model.params))
+
+def save_loglikelihood(model):
     with open("results/log_likelihood.txt", "a") as f:
         f.write(str(model.log_likelihood()) + "\n")
 
@@ -92,13 +95,15 @@ print("Done!")
 #%% Save init params and pyper params
 with open("parameters/hypparams.txt", "w") as f:
     f.write(str(model.hypparams))
-save_datas(0, model)
+save_params(0, model)
 
 #%%
 for t in trange(train_iter):
     st = time.time()
     model.resample_model(num_procs=thread_num)
     print("resample_model:{}".format(time.time() - st))
-    save_datas(t+1, model)
+    save_stateseq(model)
+    save_loglikelihood(model)
+    save_params(t+1, model)
     print(model.word_list)
     print("log_likelihood:{}".format(model.log_likelihood()))
