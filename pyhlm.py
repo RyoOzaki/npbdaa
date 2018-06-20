@@ -195,8 +195,8 @@ class WeakLimitHDPHLM(object):
         # Merge same letter seq which has different id.
         for i, word in enumerate(self.word_list):
             if word in self.word_list[:i]:
+                existed_id = self.word_list[:i].index(word)
                 for word_state in self.states_list:
-                    existed_id = self.word_list[:i].index(word)
                     stateseq, stateseq_norep = word_state.stateseq, word_state.stateseq_norep
                     word_state.stateseq[stateseq == i] = existed_id
                     word_state.stateseq_norep[stateseq_norep == i] = existed_id
