@@ -9,9 +9,6 @@ from pyhsmm.util.stats import sample_discrete
 from pyhsmm.internals.transitions import WeakLimitHDPHMMTransitions
 from pyhsmm.internals.initial_state import HMMInitialState
 import time
-from numba import jit
-
-# import rle
 
 class WeakLimitHDPHLM(object):
 
@@ -326,7 +323,6 @@ class WeakLimitHDPHLMStates(object):
         self._normalizer = normalizerl
         self.sample_forwards(betal, betastarl)
 
-    @jit
     def messages_backwards(self):
         aDl = self.aDl
         log_trans_matrix = self.log_trans_matrix
@@ -357,7 +353,6 @@ class WeakLimitHDPHLMStates(object):
 
         return cum_like
 
-    @jit
     def likelihood_block_word(self, start, stop, word):
         T = min(self.T, stop)
         tsize = T - start

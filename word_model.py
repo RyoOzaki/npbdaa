@@ -4,7 +4,6 @@ from pybasicbayes.distributions.poisson import Poisson
 from pyhsmm.util.stats import sample_discrete
 import numpy as np
 from scipy.misc import logsumexp
-from numba import jit
 
 class LetterHSMMState(HSMMStatesEigen):
 
@@ -19,7 +18,6 @@ class LetterHSMMState(HSMMStatesEigen):
     def word_idx(self):
         return self._word_idx
 
-    @jit
     def likelihood_block_word(self, word):
         T = self.T
         tsize = T
