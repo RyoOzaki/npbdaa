@@ -18,6 +18,7 @@ class LetterHSMMState(HSMMStatesEigen):
     def word_idx(self):
         return self._word_idx
 
+    @jit
     def likelihood_block_word(self, word):
         T = self.T
         tsize = T

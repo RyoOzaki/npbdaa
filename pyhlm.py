@@ -355,6 +355,7 @@ class WeakLimitHDPHLMStates(object):
 
         return cum_like
 
+    @jit
     def likelihood_block_word(self, start, stop, word):
         T = min(self.T, stop)
         tsize = T - start
