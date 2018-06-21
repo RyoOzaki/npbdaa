@@ -96,6 +96,7 @@ print("Done!")
 with open("parameters/hypparams.txt", "w") as f:
     f.write(str(model.hypparams))
 save_params(0, model)
+save_loglikelihood(model)
 
 #%%
 for t in trange(train_iter):
