@@ -42,8 +42,8 @@ def save_loglikelihood(model):
         f.write(str(model.log_likelihood()) + "\n")
 
 #%%
-thread_num = 4
-pre_train_iter = 0
+thread_num = 24
+pre_train_iter = 25
 train_iter = 100
 trunc = 60
 obs_dim = 3

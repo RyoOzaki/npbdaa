@@ -4,6 +4,7 @@ from pybasicbayes.distributions.poisson import Poisson
 from pyhsmm.util.stats import sample_discrete
 import numpy as np
 from scipy.misc import logsumexp
+from numba import jit
 
 class LetterHSMMState(HSMMStatesEigen):
 

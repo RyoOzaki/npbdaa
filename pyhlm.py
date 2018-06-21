@@ -9,6 +9,7 @@ from pyhsmm.util.stats import sample_discrete
 from pyhsmm.internals.transitions import WeakLimitHDPHMMTransitions
 from pyhsmm.internals.initial_state import HMMInitialState
 import time
+from numba import jit
 
 # import rle
 
@@ -325,6 +326,7 @@ class WeakLimitHDPHLMStates(object):
         self._normalizer = normalizerl
         self.sample_forwards(betal, betastarl)
 
+    @jit
     def messages_backwards(self):
         aDl = self.aDl
         log_trans_matrix = self.log_trans_matrix
