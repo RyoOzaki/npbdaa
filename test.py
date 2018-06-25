@@ -1,6 +1,7 @@
 import numpy as np
-from pyhlm import WeakLimitHDPHLM
-from word_model import LetterHSMM
+from pyhlm.model import WeakLimitHDPHLM
+from pyhlm.internals.hlm_states import WeakLimitHDPHLMStates
+from pyhlm.word_model import LetterHSMM
 import pyhsmm
 import warnings
 from tqdm import trange
@@ -42,8 +43,8 @@ def save_loglikelihood(model):
         f.write(str(model.log_likelihood()) + "\n")
 
 #%%
-thread_num = 24
-pre_train_iter = 25
+thread_num = 4
+pre_train_iter = 0
 train_iter = 100
 trunc = 60
 obs_dim = 3

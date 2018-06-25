@@ -92,7 +92,7 @@ class WeakLimitHDPHLMPython(object):
         self.word_list[idx] = word
 
     def add_data(self, data, **kwargs):
-        self.states_list.append(WeakLimitHDPHLMStates(self, data, **kwargs))
+        self.states_list.append(self._states_class(self, data, **kwargs))
 
     def add_word_data(self, data, **kwargs):
         self.letter_hsmm.add_data(data, **kwargs)
@@ -133,7 +133,7 @@ class WeakLimitHDPHLMPython(object):
 
     def _joblib_resample_states(self,states_list,num_procs):
         from joblib import Parallel, delayed
-        import parallel
+        from . import parallel
 
         # warn('joblib is segfaulting on OS X only, not sure why')
 
