@@ -3,7 +3,6 @@ from pyhsmm.internals.hsmm_states import HSMMStatesEigen
 from pybasicbayes.distributions.poisson import Poisson
 from pyhsmm.util.stats import sample_discrete
 import numpy as np
-from scipy.misc import logsumexp
 
 class LetterHSMMState(HSMMStatesEigen):
 
