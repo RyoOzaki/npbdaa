@@ -178,7 +178,7 @@ class WeakLimitHDPHLMPython(object):
                 if (ref_array == candi_idx).sum() == 1:
                     tmp.remove(np.where(ref_array == candi_idx)[0][0])
                 for tmp_idx in tmp:
-                    # print(hsmm_states[tmp_idx].likelihood_block_word(candi))
+                    # print(hsmm_states[tmp_idx].likelihood_block_word(candi)[-1])
                     cache_score[candi_idx, tmp_idx] = hsmm_states[tmp_idx].likelihood_block_word(candi)[-1]
             cache_scores_matrix = cache_score[ref_array]
             for i in range_tmp:

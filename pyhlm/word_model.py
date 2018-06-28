@@ -1,8 +1,11 @@
+import numpy as np
+
 from pyhsmm.models import WeakLimitHDPHSMM
 from pyhsmm.internals.hsmm_states import HSMMStatesEigen
 from pybasicbayes.distributions.poisson import Poisson
 from pyhsmm.util.stats import sample_discrete
-import numpy as np
+
+from pyhlm.internals.hlm_states import _log_likelihood_block_word
 
 class LetterHSMMState(HSMMStatesEigen):
 
@@ -19,24 +22,12 @@ class LetterHSMMState(HSMMStatesEigen):
 
     def likelihood_block_word(self, word):
         T = self.T
-        tsize = T
         aBl = self.aBl
         alDl = self.aDl
-        len_word = len(word)
-        alphal = np.ones((tsize, len_word), dtype=np.float64) * -np.inf
+        L = len(word)
+        alphal = np.empty((T, L), dtype=np.float64)
 
-        if tsize-len_word+1 <= 0:
-            return alphal[:, -1]
-
-        cumsum_aBl = np.empty(tsize-len_word+1, dtype=np.float64)
-        alphal[:tsize-len_word+1, 0] = np.cumsum(aBl[:tsize-len_word+1, word[0]]) + alDl[:tsize-len_word+1, word[0]]
-        cache_range = range(tsize - len_word + 1)
-        for j, l in enumerate(word[1:]):
-            cumsum_aBl[:] = 0.0
-            for t in cache_range:
-                cumsum_aBl[:t+1] += aBl[t+j+1, l]
-                alphal[t+j+1, j+1] = np.logaddexp.reduce(cumsum_aBl[:t+1] + alDl[t::-1, l] + alphal[j:t+j+1, j])
-        return alphal[:, -1]
+        return _log_likelihood_block_word(aBl, alDl, word, alphal)
 
     def reflect_letter_stateseq(self):
         if self._hlmstate is not None:
