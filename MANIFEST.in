@@ -1,1 +1,1 @@
-recursive-include pyhlm *.pyx *.c *.h *.cpp
+recursive-include pyhlm *.pyx *.c
