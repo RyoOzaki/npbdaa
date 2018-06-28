@@ -213,6 +213,20 @@ class WeakLimitHDPHLMStates(WeakLimitHDPHLMStatesPython):
     def messages_backwards_python(self):
         return super(WeakLimitHDPHLMStates, self).messages_backwards()
 
+    def cumulative_likelihoods(self, start, stop):
+        from pyhlm.internals.hlm_messages_interface import cumulative_internal_message_forwards_log
+        T = min(self.T, stop)
+        tsize = T - start
+        aBl = self.aBl[start:T]
+        alDl = self.alDl[:tsize]
+        cumulative_alphal = np.empty((tsize, self.model.num_states), dtype=np.float64)
+        words = [np.array(word, dtype=np.int32) for word in self.model.word_list]
+
+        return cumulative_internal_message_forwards_log(aBl, alDl, words, cumulative_alphal)
+
+    def cumulative_likelihoods_python(self, start, stop):
+        return super(WeakLimitHDPHLMStates, self).cumulative_likelihoods(start, stop)
+
     def likelihood_block_word(self, start, stop, word):
         from pyhlm.internals.hlm_messages_interface import internal_messages_forwards_log
         T = min(self.T, stop)
@@ -225,7 +239,7 @@ class WeakLimitHDPHLMStates(WeakLimitHDPHLMStatesPython):
         if tsize - L + 1 <= 0:
             return alphal[:, -1]
 
-        return internal_messages_forwards_log(aBl, alDl, np.array(word), alphal)
+        return internal_messages_forwards_log(aBl, alDl, np.array(word, dtype=np.int32), alphal)
 
     def likelihood_block_word_python(self, start, stop, word):
         return super(WeakLimitHDPHLMStates, self).likelihood_block_word(start, stop, word)
