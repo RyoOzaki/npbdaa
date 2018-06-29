@@ -64,32 +64,29 @@ class clean(_clean):
 if not os.path.exists('deps'):
     os.mkdir('deps')
 
-# # download Eigen if we don't have it in deps
-# eigenurl = 'http://bitbucket.org/eigen/eigen/get/3.2.6.tar.gz'
-# eigentarpath = os.path.join('deps', 'Eigen.tar.gz')
-# eigenpath = os.path.join('deps', 'Eigen')
-# if not os.path.exists(eigenpath):
-#     print('Downloading Eigen...')
-#     urlretrieve(eigenurl, eigentarpath)
-#     with tarfile.open(eigentarpath, 'r') as tar:
-#         tar.extractall('deps')
-#     thedir = glob(os.path.join('deps', 'eigen-eigen-*'))[0]
-#     shutil.move(os.path.join(thedir, 'Eigen'), eigenpath)
-#     print('...done!')
+# download Eigen if we don't have it in deps
+eigenurl = 'http://bitbucket.org/eigen/eigen/get/3.2.6.tar.gz'
+eigentarpath = os.path.join('deps', 'Eigen.tar.gz')
+eigenpath = os.path.join('deps', 'Eigen')
+if not os.path.exists(eigenpath):
+    print('Downloading Eigen...')
+    urlretrieve(eigenurl, eigentarpath)
+    with tarfile.open(eigentarpath, 'r') as tar:
+        tar.extractall('deps')
+    thedir = glob(os.path.join('deps', 'eigen-eigen-*'))[0]
+    shutil.move(os.path.join(thedir, 'Eigen'), eigenpath)
+    print('...done!')
 
 # make a list of extension modules
 extension_pathspec = os.path.join('pyhlm','**','*.pyx')  # not recursive before Python 3.5
 paths = [os.path.splitext(fp)[0] for fp in glob(extension_pathspec)]
 names = ['.'.join(os.path.split(p)) for p in paths]
-# ext_modules = [
-#     Extension(
-#         name, sources=[path + '.cpp'],
-#         include_dirs=['deps'],
-#         extra_compile_args=['-O3','-std=c++11','-DNDEBUG','-w','-DHLM_TEMPS_ON_HEAP'])
+
 ext_modules = [
     Extension(
-        name, sources=[path + '.c'])
-        
+        name, sources=[path + '.cpp'],
+        include_dirs=['deps'],
+        extra_compile_args=['-O3','-std=c++11','-DNDEBUG','-w','-DHLM_TEMPS_ON_HEAP'])
     for name, path in zip(names,paths)]
 
 # if using cython, rebuild the extension files from the .pyx sources
