@@ -80,6 +80,13 @@ class WeakLimitHDPHLMPython(object):
     def log_likelihood(self):
         return sum(word_state.log_likelihood() for word_state in self.states_list)
 
+    def word_counts(self):
+        r = np.zeros(self.num_states, dtype=np.int32)
+        for s in self.states_list:
+            for i in s.stateseq_norep:
+                r[i] += 1
+        return r
+
     def generate_word(self):
         size = self.length_distn.rvs() or 1
         return self.letter_hsmm.generate_word(size)
