@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from pyhlm.model import WeakLimitHDPHLM
 from pyhlm.internals.hlm_states import WeakLimitHDPHLMStates
@@ -41,6 +42,14 @@ def save_params(itr_idx, model):
 def save_loglikelihood(model):
     with open("results/log_likelihood.txt", "a") as f:
         f.write(str(model.log_likelihood()) + "\n")
+
+
+#%%
+if not os.path.exists('results'):
+    os.mkdir('results')
+
+if not os.path.exists('parameters'):
+    os.mkdir('parameters')
 
 #%%
 thread_num = 4
