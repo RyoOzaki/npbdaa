@@ -110,7 +110,7 @@ setup(name='pyhlm',
       keywords=['bayesian', 'inference', 'mcmc', 'time-series', 'monte-carlo',
                 'double articulation', 'hierarchical Dirichlet process hidden language model'],
       install_requires=[
-          "numpy", "scipy", "matplotlib", "nose", "six", "joblib"],
+          "numpy", "scipy", "matplotlib", "nose", "six", "pyhsmm>=0.1.6", "pybasicbayes>=0.2.2"],
       setup_requires=['numpy', "future", "six"],
       ext_modules=ext_modules,
       classifiers=[
