@@ -1,4 +1,5 @@
 #%%
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
@@ -42,6 +43,10 @@ def _plot_discreate_sequence(true_data, title, sample_data, plotopts = {}, cmap 
         plt.xlabel('Frame')
         plt.ylabel('Iteration')
         plt.xticks(())
+
+#%%
+if not os.path.exists("figures"):
+    os.mkdir("figures")
 
 #%%
 names = get_names()
