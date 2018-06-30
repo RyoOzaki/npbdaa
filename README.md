@@ -7,10 +7,6 @@ This generative model is called hiererichel Dirichlet process hidden language mo
 # Description
 ・NPB_DAA/README - There is a NPB-DAA tutorial in PDF.(In Japanese. English version is coming soon.)
 
-・NPB_DAA/pyhsmm - Python Library for HDP-HSMM. You can get it at [ https://github.com/mattjj/pyhsmm ]. (Please check this VERSION at README)
-
-・NPB_DAA/dahsmm - Python code for NPB-DAA
-
 # Requirement
 
 ・Ubuntu 16.04 LTS
