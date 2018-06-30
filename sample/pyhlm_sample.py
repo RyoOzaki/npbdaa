@@ -53,7 +53,7 @@ if not os.path.exists('parameters'):
 
 #%%
 thread_num = 4
-pre_train_iter = 0
+pre_train_iter = 1
 train_iter = 100
 trunc = 60
 obs_dim = 3
@@ -117,4 +117,5 @@ for t in trange(train_iter):
     save_loglikelihood(model)
     save_params(t+1, model)
     print(model.word_list)
+    print(model.word_counts())
     print("log_likelihood:{}".format(model.log_likelihood()))
