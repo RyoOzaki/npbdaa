@@ -1,13 +1,13 @@
 import numpy as np
 
+from pyhsmm.models import WeakLimitHDPHSMMPython
 from pyhsmm.models import WeakLimitHDPHSMM
+from pyhsmm.internals.hsmm_states import HSMMStatesPython
 from pyhsmm.internals.hsmm_states import HSMMStatesEigen
 from pybasicbayes.distributions.poisson import Poisson
 from pyhsmm.util.stats import sample_discrete
 
-from pyhlm.internals.hlm_states import _log_likelihood_block_word
-
-class LetterHSMMState(HSMMStatesEigen):
+class LetterHSMMStates(HSMMStatesPython):
 
     def __init__(self, model, hlmstate=None, word_idx=-1, d0=-1, d1=-1, **kwargs):
         self._hlmstate = hlmstate
@@ -21,6 +21,7 @@ class LetterHSMMState(HSMMStatesEigen):
         return self._word_idx
 
     def likelihood_block_word(self, word):
+        from pyhlm.internals.hlm_states import _log_likelihood_block_word
         T = self.T
         aBl = self.aBl
         alDl = self.aDl
@@ -43,7 +44,26 @@ class LetterHSMMState(HSMMStatesEigen):
                 np.empty(betal.shape[0],dtype='int32'))
         # assert not (0 == self.stateseq).all() #Remove this assertion.
 
-class LetterHSMM(WeakLimitHDPHSMM):
+
+class LetterHSMMStatesEigen(HSMMStatesPython):
+
+    def likelihood_block_word(self, word):
+        from pyhlm.internals.hlm_messages_interface import internal_messages_forwards_log
+        T = self.T
+        aBl = self.aBl
+        alDl = self.aDl
+        L = len(word)
+        alphal = np.ones((T, L), dtype=np.float64) * -np.inf
+
+        if tsize - L + 1 <= 0:
+            return alphal[:, -1]
+
+        return internal_messages_forwards_log(aBl, alDl, np.array(word, dtype=np.int32), alphal)
+
+    def likelihood_block_word_python(self, word):
+        return super(LetterHSMMStatesEigen, self).likelihood_block_word(self, word)
+
+class LetterHSMMPython(WeakLimitHDPHSMMPython):
     _states_class = LetterHSMMState
 
     def generate_word(self, word_size):
@@ -68,3 +88,6 @@ class LetterHSMM(WeakLimitHDPHSMM):
         dur_hypparams = {"dur_distn({})".format(idx): dur_distn.hypparams for idx, dur_distn in enumerate(self.dur_distns)}
         bigram_hypparams = self.init_state_distn.hypparams
         return {"obs_distns": obs_hypparams, "dur_distns": dur_hypparams, "bigram": bigram_hypparams}
+
+class LetterHSMM(LetterHSMMPython):
+    _states_class = LetterHSMMStatesEigen
