@@ -36,4 +36,4 @@ def internal_messages_forwards_log(
         alphal.shape[0], alphal.shape[1], aBl.shape[1],
         &aBl[0, 0], &alDl[0, 0], &word[0], &alphal[0, 0])
 
-    return alphal[:, -1]
+    return alphal
