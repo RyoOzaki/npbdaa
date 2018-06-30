@@ -111,7 +111,7 @@ setup(name='pyhlm',
                 'double articulation', 'hierarchical Dirichlet process hidden language model'],
       install_requires=[
           "future", "scipy", "matplotlib", "nose", "six", "cython", "pyhsmm>=0.1.6", "pybasicbayes>=0.2.2", "numpy"],
-      setup_requires=["future", "six", "cython", "pyhsmm>=0.1.6", "pybasicbayes>=0.2.2", "numpy"],
+      setup_requires=["future", "six", "numpy"],
       ext_modules=ext_modules,
       classifiers=[
           'Development Status :: 4 - Beta',
