@@ -236,7 +236,7 @@ def _log_likelihood_block_word(aBl, alDl, word, alphal):
     alphal[:] = -np.inf
 
     if T-L+1 <= 0:
-        return alphal[:, -1]
+        return alphal
 
     cumsum_aBl = np.empty(T-L+1, dtype=np.float64)
     alphal[:T-L+1, 0] = np.cumsum(aBl[:T-L+1, word[0]]) + alDl[:T-L+1, word[0]]
@@ -246,4 +246,4 @@ def _log_likelihood_block_word(aBl, alDl, word, alphal):
         for t in cache_range:
             cumsum_aBl[:t+1] += aBl[t+j+1, l]
             alphal[t+j+1, j+1] = np.logaddexp.reduce(cumsum_aBl[:t+1] + alDl[t::-1, l] + alphal[j:t+j+1, j])
-    return alphal[:, -1]
+    return alphal

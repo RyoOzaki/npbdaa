@@ -7,14 +7,14 @@ from pyhsmm.internals.hsmm_states import HSMMStatesEigen
 from pybasicbayes.distributions.poisson import Poisson
 from pyhsmm.util.stats import sample_discrete
 
-class LetterHSMMStates(HSMMStatesPython):
+class LetterHSMMStatesPython(HSMMStatesPython):
 
     def __init__(self, model, hlmstate=None, word_idx=-1, d0=-1, d1=-1, **kwargs):
         self._hlmstate = hlmstate
         self._word_idx = word_idx
         self._d0 = d0
         self._d1 = d1
-        super(LetterHSMMState, self).__init__(model, **kwargs)
+        super(LetterHSMMStatesPython, self).__init__(model, **kwargs)
 
     @property
     def word_idx(self):
@@ -28,7 +28,7 @@ class LetterHSMMStates(HSMMStatesPython):
         L = len(word)
         alphal = np.empty((T, L), dtype=np.float64)
 
-        return _log_likelihood_block_word(aBl, alDl, word, alphal)
+        return _log_likelihood_block_word(aBl, alDl, word, alphal)[:, -1]
 
     def reflect_letter_stateseq(self):
         if self._hlmstate is not None:
@@ -45,7 +45,7 @@ class LetterHSMMStates(HSMMStatesPython):
         # assert not (0 == self.stateseq).all() #Remove this assertion.
 
 
-class LetterHSMMStatesEigen(HSMMStatesPython):
+class LetterHSMMStatesEigen(HSMMStatesEigen, LetterHSMMStatesPython):
 
     def likelihood_block_word(self, word):
         from pyhlm.internals.hlm_messages_interface import internal_messages_forwards_log
@@ -55,16 +55,26 @@ class LetterHSMMStatesEigen(HSMMStatesPython):
         L = len(word)
         alphal = np.ones((T, L), dtype=np.float64) * -np.inf
 
-        if tsize - L + 1 <= 0:
+        if T - L + 1 <= 0:
             return alphal[:, -1]
 
-        return internal_messages_forwards_log(aBl, alDl, np.array(word, dtype=np.int32), alphal)
+        return internal_messages_forwards_log(aBl, alDl, np.array(word, dtype=np.int32), alphal)[:, -1]
+
+    def sample_forwards(self,betal,betastarl):
+        from pyhsmm.internals.hsmm_messages_interface import sample_forwards_log
+        if self.left_censoring:
+            raise NotImplementedError
+        caBl = np.vstack((np.zeros(betal.shape[1]), np.cumsum(self.aBl[:-1],axis=0)))
+        self.stateseq = sample_forwards_log(
+                self.trans_matrix, caBl, self.aDl, self.pi_0, betal, betastarl,
+                np.empty(betal.shape[0],dtype='int32'))
+        # assert not (0 == self.stateseq).all() #Remove this assertion.
 
     def likelihood_block_word_python(self, word):
         return super(LetterHSMMStatesEigen, self).likelihood_block_word(self, word)
 
 class LetterHSMMPython(WeakLimitHDPHSMMPython):
-    _states_class = LetterHSMMState
+    _states_class = LetterHSMMStatesPython
 
     def generate_word(self, word_size):
         nextstate_distn = self.init_state_distn.pi_0
@@ -89,5 +99,5 @@ class LetterHSMMPython(WeakLimitHDPHSMMPython):
         bigram_hypparams = self.init_state_distn.hypparams
         return {"obs_distns": obs_hypparams, "dur_distns": dur_hypparams, "bigram": bigram_hypparams}
 
-class LetterHSMM(LetterHSMMPython):
+class LetterHSMM(WeakLimitHDPHSMM, LetterHSMMPython):
     _states_class = LetterHSMMStatesEigen

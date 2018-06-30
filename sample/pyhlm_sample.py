@@ -53,7 +53,7 @@ if not os.path.exists('parameters'):
 
 #%%
 thread_num = 4
-pre_train_iter = 1
+pre_train_iter = 10
 train_iter = 100
 trunc = 60
 obs_dim = 3
