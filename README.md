@@ -14,7 +14,11 @@ This generative model is called hiererichel Dirichlet process hidden language mo
 
 ・Scipy 1.0.1
 
+・Scikit-learn 0.19.1 
+
 ・Matplotlib 2.2.2
+
+・Joblib 0.11
 
 ・Cython 0.28.2
 
