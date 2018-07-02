@@ -40,8 +40,12 @@ def save_params(itr_idx, model):
         f.write(str(model.params))
 
 def save_loglikelihood(model):
-    with open("results/log_likelihood.txt", "a") as f:
+    with open("summary_files/log_likelihood.txt", "a") as f:
         f.write(str(model.log_likelihood()) + "\n")
+
+def save_resample_times(resample_time):
+    with open("summary_files/resample_times.txt", "a") as f:
+        f.write(str(resample_time) + "\n")
 
 
 #%%
@@ -51,9 +55,12 @@ if not os.path.exists('results'):
 if not os.path.exists('parameters'):
     os.mkdir('parameters')
 
+if not os.path.exists('summary_files'):
+    os.mkdir('summary_files')
+
 #%%
 thread_num = 4
-pre_train_iter = 10
+pre_train_iter = 1
 train_iter = 100
 trunc = 60
 obs_dim = 3
@@ -112,10 +119,11 @@ save_loglikelihood(model)
 for t in trange(train_iter):
     st = time.time()
     model.resample_model(num_procs=thread_num)
-    print("resample_model:{}".format(time.time() - st))
+    resample_model_time = time.time() - st
     save_stateseq(model)
     save_loglikelihood(model)
     save_params(t+1, model)
+    save_resample_times(resample_time)
     print(model.word_list)
     print(model.word_counts())
     print("log_likelihood:{}".format(model.log_likelihood()))
