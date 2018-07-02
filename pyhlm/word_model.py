@@ -71,7 +71,7 @@ class LetterHSMMStatesEigen(HSMMStatesEigen, LetterHSMMStatesPython):
         # assert not (0 == self.stateseq).all() #Remove this assertion.
 
     def likelihood_block_word_python(self, word):
-        return super(LetterHSMMStatesEigen, self).likelihood_block_word(self, word)
+        return super(LetterHSMMStatesEigen, self).likelihood_block_word(word)
 
 class LetterHSMMPython(WeakLimitHDPHSMMPython):
     _states_class = LetterHSMMStatesPython
