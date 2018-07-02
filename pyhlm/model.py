@@ -6,7 +6,6 @@ from pyhsmm.internals.transitions import WeakLimitHDPHMMTransitions
 from pyhsmm.internals.initial_state import HMMInitialState
 
 from pyhlm.internals import hlm_states
-import time
 
 class WeakLimitHDPHLMPython(object):
     _states_class = hlm_states.WeakLimitHDPHLMStatesPython
@@ -105,32 +104,18 @@ class WeakLimitHDPHLMPython(object):
         self.letter_hsmm.add_data(data, **kwargs)
 
     def resample_model(self, num_procs=0):
-        times = [0.] * 4
         self.letter_hsmm.states_list = []
         [word_state.add_word_datas(generate=False) for word_state in self.states_list]
-        st = time.time()
         self.letter_hsmm.resample_states(num_procs=num_procs)
-        times[1] = time.time() - st
         [letter_state.reflect_letter_stateseq() for letter_state in self.letter_hsmm.states_list]
-        st = time.time()
         self.resample_words()
-        times[2] = time.time() - st
-        st = time.time()
         self.letter_hsmm.resample_parameters()
         self.resample_length_distn()
         self.resample_dur_distns()
         self.resample_trans_distn()
         self.resample_init_state_distn()
-        times[3] = time.time() - st
-        st = time.time()
         self.resample_states(num_procs=num_procs)
-        times[0] = time.time() - st
         self._clear_caches()
-
-        print("Resample states:{}".format(times[0]))
-        print("Resample letter states:{}".format(times[1]))
-        print("SIR:{}".format(times[2]))
-        print("Resample others:{}".format(times[3]))
 
     def resample_states(self, num_procs=0):
         if num_procs == 0:
