@@ -123,7 +123,7 @@ for t in trange(train_iter):
     save_stateseq(model)
     save_loglikelihood(model)
     save_params(t+1, model)
-    save_resample_times(resample_time)
+    save_resample_times(resample_model_time)
     print(model.word_list)
     print(model.word_counts())
     print("log_likelihood:{}".format(model.log_likelihood()))
