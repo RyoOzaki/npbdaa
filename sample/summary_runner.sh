@@ -5,7 +5,7 @@ label=sample_results
 while getopts l: OPT
 do
   case $OPT in
-    "l" ) label="${OPTAGT}" ;;
+    "l" ) label="${OPTARG}" ;;
   esac
 done
 
@@ -27,3 +27,7 @@ do
   cp -r figures/ ${label}/${dir}/
 
 done
+
+rm -rf summary_files
+rm -rf results
+rm -f log.txt

@@ -34,3 +34,8 @@ do
   cp log.txt ${label}/${i_str}/
 
 done
+
+rm -rf results
+rm -rf parameters
+rm -rf summary_files
+rm -f log.txt
