@@ -147,7 +147,7 @@ class WeakLimitHDPHLMPython(object):
                 s.stateseq, s._stateseq_norep, s._durations_censored, s._normalizer = stateseq, stateseq_norep, durations_censored, log_likelihood
 
     def _get_joblib_pair(self,states_obj):
-        return (states_obj.data,states_obj._kwargs)
+        return (states_obj.data, states_obj._kwargs)
 
     def resample_words(self):
         for word_idx in range(self.num_states):
