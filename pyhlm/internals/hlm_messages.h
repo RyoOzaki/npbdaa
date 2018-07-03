@@ -41,20 +41,34 @@ namespace hlm
       //initialize.
       ealphal.setConstant(-1.0*numeric_limits<Type>::infinity());
 
+      /* Same as follows.
       sumsofar.setZero();
       for(int t=0; t<T-L+1; t++){
         sumsofar.tail(T-L+1-t) += eaBl(t, word[0]);
       }
       ealphal.block(0, 0, T-L+1, 1) = sumsofar.transpose() + ealDl.block(0, word[0], T-L+1, 1);
+      */
 
-      Type cmax;
+      Type ctmp = 0.0;
+      for(int t=0; t<T-L+1; t++){
+        // sumsofar.tail(T-L+1-t) += eaBl(t, word[0]);//Same as follows.
+        ctmp = ctmp + eaBl(t, word[0]);
+        ealphal(t, 0) = ctmp + ealDl(t, word[0]);
+      }
+
       for(int j=0; j<L-1; j++){
         sumsofar.setZero();
         for(int t=0; t<T-L+1; t++){
-          sumsofar.head(t+1) += eaBl(t+j+1, word[j+1]);
-          result.head(t+1) = sumsofar.head(t+1) + ealDl.block(0, word[j+1], t+1, 1).transpose().reverse() + ealphal.block(j, j, t+1, 1).transpose();
-          cmax = result.head(t+1).maxCoeff();
-          ealphal(t+j+1, j+1) = log((result.head(t+1) - cmax).exp().sum()) + cmax;
+          /* Same as follows.
+          // sumsofar.head(t+1) += eaBl(t+j+1, word[j+1]);
+          // result.head(t+1) = sumsofar.head(t+1) + ealDl.block(0, word[j+1], t+1, 1).transpose().reverse() + ealphal.block(j, j, t+1, 1).transpose();
+          */
+          for(int tau=0; tau<=t; tau++){
+            sumsofar(tau) = sumsofar(tau) + eaBl(t+j+1, word[j+1]);
+            result(tau) = sumsofar(tau) + ealDl(t-tau, word[j+1]) + ealphal(j+tau, j);
+          }
+          ctmp = result.head(t+1).maxCoeff();
+          ealphal(t+j+1, j+1) = log((result.head(t+1) - ctmp).exp().sum()) + ctmp;
         }
       }
     }
