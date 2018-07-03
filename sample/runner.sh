@@ -1,10 +1,21 @@
-#!/bin/sh
+#!/bin/bash
 
 label=sample_results
+begin=1
+end=20
+
+while getopts l:b:e: OPT
+do
+  case $OPT in
+    "l" ) label="${OPTARG}" ;;
+    "b" ) begin="${OPTARG}" ;;
+    "e" ) end="${OPTARG}" ;;
+  esac
+done
 
 mkdir -p ${label}
 
-for i in `seq 1 20`
+for i in `seq ${begin} ${end}`
 do
   echo ${i}
 

@@ -1,6 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 
 label=sample_results
+
+while getopts l: OPT
+do
+  case $OPT in
+    "l" ) label="${OPTAGT}" ;;
+  esac
+done
 
 for dir in `ls ${label}`
 do
