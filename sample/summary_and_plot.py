@@ -63,6 +63,9 @@ l_results, w_results, d_results = get_results(names, length)
 # l_results, w_results = get_results(names, length)
 concat_l_r = np.concatenate(l_results, axis=1)
 concat_w_r = np.concatenate(w_results, axis=1)
+
+log_likelihood = np.loadtxt("summary_files/log_likelihood.txt")
+resample_times = np.loadtxt("summary_files/resample_times.txt")
 print("Done!")
 
 L = 10
@@ -113,3 +116,16 @@ plt.plot(range(T), word_ARI, ".-")
 plt.clf()
 plt.title("Log likelihood")
 plt.plot(range(T+1), log_likelihood, ".-")
+plt.savefig("figures/Log_likelihood.png")
+
+#%%
+plt.clf()
+plt.title("Resample times")
+plt.plot(range(T), resample_times, ".-")
+plt.savefig("figures/Resample_times.png")
+
+#%%
+np.savetxt("summary_files/Letter_ARI.txt", letter_ARI)
+np.savetxt("summary_files/Word_ARI.txt", word_ARI)
+with open("summary_files/Sum_of_resample_times.txt", "w") as f:
+    f.write(str(np.sum(resample_times)))
