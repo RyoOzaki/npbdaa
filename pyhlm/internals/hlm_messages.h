@@ -38,13 +38,6 @@ namespace hlm
         NPRowVectorArray<Type> result(result_buf,T-L+1);
 #endif
 
-      //calculate alpha[:, 0].
-      // Type csum = 0.0;
-      // for(int t=0; t<T-L+1; t++){
-      //   csum = csum + eaBl(t, word[0]);
-      //   ealphal(t, 0) = csum + ealDl(t, word[0]);
-      // }
-
       //initialize.
       ealphal.setConstant(-1.0*numeric_limits<Type>::infinity());
 
@@ -58,12 +51,7 @@ namespace hlm
       for(int j=0; j<L-1; j++){
         sumsofar.setZero();
         for(int t=0; t<T-L+1; t++){
-          // for(int tau=0; tau<=t; tau++){
-          //   sumsofar(tau) = sumsofar(tau) + eaBl(t+j+1, word[j+1]);
-          //   result(tau) = sumsofar(tau) + ealDl(t-tau, word[j+1]) + ealphal(j+tau, j);
-          // }
           sumsofar.head(t+1) += eaBl(t+j+1, word[j+1]);
-          // result.head(t+1) = sumsofar.head(t+1) + ealDl.col(word[j+1]).head(t+1).reverse() + ealphal.col(j).segment(j, t+j);
           result.head(t+1) = sumsofar.head(t+1) + ealDl.block(0, word[j+1], t+1, 1).transpose().reverse() + ealphal.block(j, j, t+1, 1).transpose();
           cmax = result.head(t+1).maxCoeff();
           ealphal(t+j+1, j+1) = log((result.head(t+1) - cmax).exp().sum()) + cmax;
