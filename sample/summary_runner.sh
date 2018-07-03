@@ -28,6 +28,6 @@ do
 
 done
 
-rm -rf summary_files
-rm -rf results
+rm -f summary_files/*
+rm -f results/*
 rm -f log.txt

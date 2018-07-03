@@ -35,7 +35,7 @@ do
 
 done
 
-rm -rf results
-rm -rf parameters
-rm -rf summary_files
+rm -f results/*
+rm -f parameters/*
+rm -f summary_files/*
 rm -f log.txt
