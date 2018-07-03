@@ -12,6 +12,7 @@ do
 
   cp ${label}/${dir}/log.txt ./
   cp ${label}/${dir}/results/* results/
+  cp ${label}/${dir}/summary_files/* summary_files/
 
   python summary_and_plot_light.py
 

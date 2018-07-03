@@ -127,3 +127,4 @@ for t in trange(train_iter):
     print(model.word_list)
     print(model.word_counts())
     print("log_likelihood:{}".format(model.log_likelihood()))
+    print("resample_model:{}".format(resample_model_time))
