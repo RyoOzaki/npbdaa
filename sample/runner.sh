@@ -15,6 +15,10 @@ done
 
 mkdir -p ${label}
 
+mkdir -p results
+mkdir -p parameters
+mkdir -p summary_files
+
 for i in `seq ${begin} ${end}`
 do
   echo ${i}

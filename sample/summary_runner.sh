@@ -9,6 +9,9 @@ do
   esac
 done
 
+mkdir -p summary_files
+mkdir -p results
+
 for dir in `ls ${label}`
 do
   echo ${dir}
