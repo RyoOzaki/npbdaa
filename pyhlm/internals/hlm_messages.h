@@ -28,8 +28,6 @@ namespace hlm
 
       NPArray<Type> ealphal(alphal, T, L);
 
-      ealphal.col(L-1).setConstant(-1.0*numeric_limits<Type>::infinity());
-
 #ifdef HLM_TEMPS_ON_HEAP
         Array<Type,1,Dynamic> sumsofar(T-L+1);
         Array<Type,1,Dynamic> result(T-L+1);
@@ -41,21 +39,32 @@ namespace hlm
 #endif
 
       //calculate alpha[:, 0].
-      Type csum = 0.0;
+      // Type csum = 0.0;
+      // for(int t=0; t<T-L+1; t++){
+      //   csum = csum + eaBl(t, word[0]);
+      //   ealphal(t, 0) = csum + ealDl(t, word[0]);
+      // }
+
+      //initialize.
+      ealphal.setConstant(-1.0*numeric_limits<Type>::infinity());
+
+      sumsofar.setZero();
       for(int t=0; t<T-L+1; t++){
-        csum = csum + eaBl(t, word[0]);
-        ealphal(t, 0) = csum + ealDl(t, word[0]);
+        sumsofar.tail(T-L+1-t) += eaBl(t, word[0]);
       }
+      ealphal.block(0, 0, T-L+1, 1) = sumsofar.transpose() + ealDl.block(0, word[0], T-L+1, 1);
 
       Type cmax;
       for(int j=0; j<L-1; j++){
         sumsofar.setZero();
-        ealphal.col(j+1).setConstant(-1.0*numeric_limits<Type>::infinity());
         for(int t=0; t<T-L+1; t++){
-          for(int tau=0; tau<=t; tau++){
-            sumsofar(tau) = sumsofar(tau) + eaBl(t+j+1, word[j+1]);
-            result(tau) = sumsofar(tau) + ealDl(t-tau, word[j+1]) + ealphal(j+tau, j);
-          }
+          // for(int tau=0; tau<=t; tau++){
+          //   sumsofar(tau) = sumsofar(tau) + eaBl(t+j+1, word[j+1]);
+          //   result(tau) = sumsofar(tau) + ealDl(t-tau, word[j+1]) + ealphal(j+tau, j);
+          // }
+          sumsofar.head(t+1) += eaBl(t+j+1, word[j+1]);
+          // result.head(t+1) = sumsofar.head(t+1) + ealDl.col(word[j+1]).head(t+1).reverse() + ealphal.col(j).segment(j, t+j);
+          result.head(t+1) = sumsofar.head(t+1) + ealDl.block(0, word[j+1], t+1, 1).transpose().reverse() + ealphal.block(j, j, t+1, 1).transpose();
           cmax = result.head(t+1).maxCoeff();
           ealphal(t+j+1, j+1) = log((result.head(t+1) - cmax).exp().sum()) + cmax;
         }
