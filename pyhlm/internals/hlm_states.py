@@ -144,7 +144,7 @@ class WeakLimitHDPHLMStatesPython(object):
         L = len(word)
         alphal = np.ones((tsize, L), dtype=np.float64) * -np.inf
 
-        return _log_likelihood_block_word(aBl, alDl, word, alphal)
+        return _log_likelihood_block_word(aBl, alDl, word, alphal)[:, -1]
 
     def sample_forwards(self, betal, betastarl):
         T = self.T
