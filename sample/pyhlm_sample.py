@@ -2,7 +2,7 @@ import os
 import numpy as np
 from pyhlm.model import WeakLimitHDPHLM, WeakLimitHDPHLMPython
 from pyhlm.internals.hlm_states import WeakLimitHDPHLMStates
-from pyhlm.word_model import LetterHSMM
+from pyhlm.word_model import LetterHSMM, LetterHSMMPython
 import pyhsmm
 import warnings
 from tqdm import trange
