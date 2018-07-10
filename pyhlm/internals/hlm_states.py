@@ -132,7 +132,7 @@ class WeakLimitHDPHLMStatesPython(object):
         cum_like = np.empty((tsize, self.model.num_states), dtype=np.float64)
 
         for state, word in enumerate(self.model.word_list):
-            cum_like[:, state] = self.likelihood_block_word(start, stop, word)
+            cum_like[:, state] = self.likelihood_block_word(start, stop, word)[:, -1]
 
         return cum_like
 
@@ -167,7 +167,7 @@ class WeakLimitHDPHLMStatesPython(object):
             state = sample_discrete(nextstate_dist)
             durprob = np.random.random()
             # dur = len(self.model.word_list[state])
-            cache_mess_term = np.exp(self.likelihood_block_word(t, T, self.model.word_list[state]) + betal[t:T, state] - betastarl[t, state])
+            cache_mess_term = np.exp(self.likelihood_block_word(t, T, self.model.word_list[state])[:, -1] + betal[t:T, state] - betastarl[t, state])
 
             dur = 0
             while durprob > 0 and t+dur < T:
