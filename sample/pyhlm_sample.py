@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from pyhlm.model import WeakLimitHDPHLM
+from pyhlm.model import WeakLimitHDPHLM, WeakLimitHDPHLMPython
 from pyhlm.internals.hlm_states import WeakLimitHDPHLMStates
 from pyhlm.word_model import LetterHSMM
 import pyhsmm
