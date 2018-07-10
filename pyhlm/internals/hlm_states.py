@@ -223,9 +223,9 @@ class WeakLimitHDPHLMStates(WeakLimitHDPHLMStatesPython):
         alphal = np.ones((tsize, L), dtype=np.float64) * -np.inf
 
         if tsize - L + 1 <= 0:
-            return alphal[:, -1]
+            return alphal
 
-        return internal_messages_forwards_log(aBl, alDl, np.array(word, dtype=np.int32), alphal)[:, -1]
+        return internal_messages_forwards_log(aBl, alDl, np.array(word, dtype=np.int32), alphal)
 
     def likelihood_block_word_python(self, start, stop, word):
         return super(WeakLimitHDPHLMStates, self).likelihood_block_word(start, stop, word)
