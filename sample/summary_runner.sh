@@ -9,10 +9,12 @@ do
   esac
 done
 
+result_dirs=`ls ${label} | grep "[0-9]*"`
+
 mkdir -p summary_files
 mkdir -p results
 
-for dir in `ls ${label}`
+for dir in ${result_dirs}
 do
   echo ${dir}
 
@@ -32,5 +34,15 @@ do
 done
 
 rm -f summary_files/*
+rm -f figures/*
 rm -f results/*
 rm -f log.txt
+
+python summary_summary.py ${label} ${result_dirs}
+
+cp -r summary_files ${label}
+cp -r figures ${label}
+
+rm -rf summary_files
+rm -rf figures
+rm -rf results
