@@ -26,6 +26,11 @@ This generative model is called hiererichel Dirichlet process hidden language mo
 
 ・pyhsmm 0.1.6
 
+----
+For sample codes:
+
+・tqdm 4.23.4
+
 # Install
 1. Install Python environments and gcc if you use.
 2. Install pybasicbayes.
