@@ -47,7 +47,7 @@ $ python setup.py install
 ```
 4. Install pyhlm (this).
 ```
-$ git clone https://github.com/RyoOzaki/npbdaa
+$ git clone https://github.com/RyoOzaki/npbdaa pyhlm
 $ cd pyhlm
 $ python setup.py install
 ```
