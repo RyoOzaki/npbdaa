@@ -1,6 +1,7 @@
 import numpy as np
 
 from pyhsmm.util.stats import sample_discrete
+from pyhsmm.util.general import rle
 
 class WeakLimitHDPHLMStatesPython(object):
 
@@ -12,6 +13,7 @@ class WeakLimitHDPHLMStatesPython(object):
         self._stateseq = np.empty(T, dtype=np.int32)
         self._stateseq_norep = None
         self._durations_censored = None
+        self._normalizer = None
         self._letter_stateseq = np.empty(T, dtype=np.int32)
         self._kwargs = dict(trunc=trunc)
         if generate:
