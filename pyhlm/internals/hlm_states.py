@@ -191,7 +191,6 @@ class WeakLimitHDPHLMStatesPython(object):
 
             stateseq_norep.append(state)
             durations_censored.append(dur)
-        assert stateseq >= 0
         self._stateseq_norep = np.array(stateseq_norep, dtype=np.int32)
         self._durations_censored = np.array(durations_censored, dtype=np.int32)
 
