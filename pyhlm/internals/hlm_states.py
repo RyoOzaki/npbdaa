@@ -10,11 +10,11 @@ class WeakLimitHDPHLMStatesPython(object):
         self.data = data
         self.T = T = len(data)
         self.trunc = trunc
-        self._stateseq = np.empty(T, dtype=np.int32)
+        self._stateseq = np.zeros(T, dtype=np.int32)
         self._stateseq_norep = None
         self._durations_censored = None
         self._normalizer = None
-        self._letter_stateseq = np.empty(T, dtype=np.int32)
+        self._letter_stateseq = np.zeros(T, dtype=np.int32)
         self._kwargs = dict(trunc=trunc)
         if generate:
             if data is not None and not initialize_from_prior:
@@ -191,6 +191,7 @@ class WeakLimitHDPHLMStatesPython(object):
 
             stateseq_norep.append(state)
             durations_censored.append(dur)
+        assert stateseq >= 0
         self._stateseq_norep = np.array(stateseq_norep, dtype=np.int32)
         self._durations_censored = np.array(durations_censored, dtype=np.int32)
 
