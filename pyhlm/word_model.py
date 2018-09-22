@@ -7,6 +7,8 @@ from pyhsmm.internals.hsmm_states import HSMMStatesEigen
 from pybasicbayes.distributions.poisson import Poisson
 from pyhsmm.util.stats import sample_discrete
 
+from pyhlm.util.util import np2list
+
 class LetterHSMMStatesPython(HSMMStatesPython):
 
     def __init__(self, model, hlmstate=None, word_idx=-1, d0=-1, d1=-1, **kwargs):

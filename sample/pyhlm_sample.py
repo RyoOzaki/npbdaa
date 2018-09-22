@@ -1,4 +1,5 @@
 import os
+import json
 import numpy as np
 from pyhlm.model import WeakLimitHDPHLM, WeakLimitHDPHLMPython
 from pyhlm.internals.hlm_states import WeakLimitHDPHLMStates
@@ -36,8 +37,8 @@ def save_stateseq(model):
             np.savetxt(f, unpack_durations(s.durations_censored))
 
 def save_params(itr_idx, model):
-    with open("parameters/ITR_{0:04d}.txt".format(itr_idx), "w") as f:
-        f.write(str(model.params))
+    with open("parameters/ITR_{0:04d}.json".format(itr_idx), "w") as f:
+        json.dump(model.params, f)
 
 def save_loglikelihood(model):
     with open("summary_files/log_likelihood.txt", "a") as f:
@@ -110,8 +111,8 @@ model.resample_states(num_procs=thread_num)
 print("Done!")
 
 #%% Save init params and pyper params
-with open("parameters/hypparams.txt", "w") as f:
-    f.write(str(model.hypparams))
+with open("parameters/hypparams.json", "w") as f:
+    json.dump(model.hypparams, f)
 save_params(0, model)
 save_loglikelihood(model)
 
