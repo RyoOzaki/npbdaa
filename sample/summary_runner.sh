@@ -18,7 +18,9 @@ for dir in ${result_dirs}
 do
   echo ${dir}
 
-  sh clean.sh
+  rm -f summary_files/*
+  rm -f results/*
+  rm -f log.txt
 
   cp ${label}/${dir}/log.txt ./
   cp ${label}/${dir}/results/* results/
@@ -31,11 +33,16 @@ do
 
 done
 
-sh clean.sh
+rm -f summary_files/*
+rm -f figures/*
+rm -f results/*
+rm -f log.txt
 
 python summary_summary.py ${label} ${result_dirs}
 
 cp -r summary_files ${label}
 cp -r figures ${label}
 
-sh clean.sh
+rm -rf summary_files
+rm -rf figures
+rm -rf results

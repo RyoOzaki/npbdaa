@@ -23,13 +23,11 @@ for i in `seq ${begin} ${end}`
 do
   echo ${i}
 
-  echo "#!/bin/sh" > continue.sh
-  echo "" >> continue.sh
-  echo "sh clean.sh" >> continue.sh
-  echo "sh runner.sh -l ${label} -b ${i} -e ${end}" >> continue.sh
-
   i_str=$( printf '%02d' $i )
-  sh clean.sh
+  rm -f results/*
+  rm -f parameters/*
+  rm -f summary_files/*
+  rm -f log.txt
 
   python pyhlm_sample.py | tee log.txt
 
@@ -41,5 +39,7 @@ do
 
 done
 
-sh clean.sh
-rm -f continue.sh
+rm -f results/*
+rm -f parameters/*
+rm -f summary_files/*
+rm -f log.txt
