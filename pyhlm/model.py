@@ -68,7 +68,13 @@ class WeakLimitHDPHLMPython(object):
         letter_hsmm_params = self.letter_hsmm.params
         bigram_params = {**self.init_state_distn.params, "trans_matrix": self.trans_distn.trans_matrix}
         length_params = self.length_distn.params
-        return np2list({"num_states": self.num_states, "word_list": self.word_list, "letter_hsmm": letter_hsmm_params, "word_length": length_params, "bigram": bigram_params})
+        word_list = self.word_list
+        for i, word in enumerate(word_list):
+            lst = list(word)
+            for j, char in enumerate(lst):
+                lst[j] = int(char)
+            word_list[i] = tuple(lst)
+        return np2list({"num_states": self.num_states, "word_list": word_list, "letter_hsmm": letter_hsmm_params, "word_length": length_params, "bigram": bigram_params})
 
     @property
     def hypparams(self):
