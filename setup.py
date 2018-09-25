@@ -82,6 +82,9 @@ extension_pathspec = os.path.join('pyhlm','**','*.pyx')  # not recursive before 
 paths = [os.path.splitext(fp)[0] for fp in glob(extension_pathspec)]
 names = ['.'.join(os.path.split(p)) for p in paths]
 
+with open("requirements.txt", "r") as f:
+    requirements = list(f.readlines())
+
 ext_modules = [
     Extension(
         name, sources=[path + '.cpp'],
@@ -109,9 +112,8 @@ setup(name='pyhlm',
       platforms='ALL',
       keywords=['bayesian', 'inference', 'mcmc', 'time-series', 'monte-carlo',
                 'double articulation', 'hierarchical Dirichlet process hidden language model'],
-      install_requires=[
-          "numpy", "scipy", "matplotlib", "nose", "six", "pyhsmm>=0.1.6", "pybasicbayes>=0.2.2"],
-      setup_requires=["six", "numpy"],
+      install_requires=requirements,
+      setup_requires=['numpy', "future", "six"],
       ext_modules=ext_modules,
       classifiers=[
           'Development Status :: 4 - Beta',
