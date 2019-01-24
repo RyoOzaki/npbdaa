@@ -11,27 +11,38 @@ from sklearn.metrics import adjusted_rand_score
 def get_names():
     return np.loadtxt("files.txt", dtype=str)
 
-def get_labels(names):
-    letter_labels = [np.loadtxt("LABEL/" + name + ".lab") for name in names]
-    word_labels = [np.loadtxt("LABEL/" + name + ".lab2") for name in names]
-    return letter_labels, word_labels
+def get_letter_labels(names):
+    return _get_labels(names, "lab")
+
+def get_word_labels(names):
+    return _get_labels(names, "lab2")
+
+def _get_labels(names, ext):
+    return [np.loadtxt("LABEL/" + name + "." + ext) for name in names]
+
 
 def get_datas_and_length(names):
     datas = [np.loadtxt("DATA/" + name + ".txt") for name in names]
     length = [len(d) for d in datas]
     return datas, length
 
-def get_results(names, length):
-    letter_results = [np.loadtxt("results/" + name + "_l.txt").reshape((-1, l)) for name, l in zip(names, length)]
-    word_results = [np.loadtxt("results/" + name + "_s.txt").reshape((-1, l)) for name, l in zip(names, length)]
-    dur_results = [np.loadtxt("results/" + name + "_d.txt").reshape((-1, l)) for name, l in zip(names, length)]
-    return letter_results, word_results, dur_results
+def get_results_of_word(names, length):
+    return _joblib_get_results(names, length, "s")
 
-def save_results(names, letter, word, dur):
-    for idx, name in enumerate(names):
-        np.loadtxt("results/" + name + "_l.txt", letter[idx])
-        np.loadtxt("results/" + name + "_s.txt", word[idx])
-        np.loadtxt("results/" + name + "_d.txt", dur[idx])
+def get_results_of_letter(names, length):
+    return _joblib_get_results(names, length, "l")
+
+def get_results_of_duration(names, length):
+    return _joblib_get_results(names, length, "d")
+
+def _get_results(names, lengths, c):
+    return [np.loadtxt("results/" + name + "_" + c + ".txt").reshape((-1, l)) for name, l in zip(names, lengths)]
+
+def _joblib_get_results(names, lengths, c):
+    from joblib import Parallel, delayed
+    def _component(name, length, c):
+        return np.loadtxt("results/" + name + "_" + c + ".txt").reshape((-1, length))
+    return Parallel(n_jobs=-1)([delayed(_component)(n, l, c) for n, l in zip(names, lengths)])
 
 #%%
 if not os.path.exists("figures"):
@@ -44,11 +55,15 @@ if not os.path.exists("summary_files"):
 print("Loading results....")
 names = get_names()
 datas, length = get_datas_and_length(names)
-l_labels, w_labels = get_labels(names)
+l_labels = get_letter_labels(names)
+w_labels = get_word_labels(names)
 concat_l_l = np.concatenate(l_labels, axis=0)
 concat_w_l = np.concatenate(w_labels, axis=0)
 
-l_results, w_results, d_results = get_results(names, length)
+l_results = get_results_of_letter(names, length)
+w_results = get_results_of_word(names, length)
+d_results = get_results_of_duration(names, length)
+
 concat_l_r = np.concatenate(l_results, axis=1)
 concat_w_r = np.concatenate(w_results, axis=1)
 

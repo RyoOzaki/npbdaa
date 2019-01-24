@@ -9,7 +9,7 @@ do
   esac
 done
 
-result_dirs=`ls ${label} | grep "[0-9]*"`
+result_dirs=`ls ${label} | grep -o "[0-9]*"`
 
 mkdir -p summary_files
 mkdir -p results

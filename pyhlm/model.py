@@ -23,7 +23,10 @@ class WeakLimitHDPHLMPython(object):
 
         self.word_list = [None] * self.num_states
         for i in range(self.num_states):
-            self._generate_word_and_set_at(i)
+            word = self.generate_word()
+            while word in self.word_list[:i]:
+                word = self.generate_word()
+            self.word_list[i] = word
         self.resample_dur_distns()
 
     @property
@@ -90,13 +93,6 @@ class WeakLimitHDPHLMPython(object):
         size = self.length_distn.rvs() or 1
         return self.letter_hsmm.generate_word(size)
 
-    def _generate_word_and_set_at(self, idx):
-        self.word_list[idx] = None
-        word = self.generate_word()
-        while word in self.word_list:
-            word = self.generate_word()
-        self.word_list[idx] = word
-
     def add_data(self, data, **kwargs):
         self.states_list.append(self._states_class(self, data, **kwargs))
 
@@ -108,7 +104,7 @@ class WeakLimitHDPHLMPython(object):
         [word_state.add_word_datas(generate=False) for word_state in self.states_list]
         self.letter_hsmm.resample_states(num_procs=num_procs)
         [letter_state.reflect_letter_stateseq() for letter_state in self.letter_hsmm.states_list]
-        self.resample_words()
+        self.resample_words(num_procs=num_procs)
         self.letter_hsmm.resample_parameters()
         self.resample_length_distn()
         self.resample_dur_distns()
@@ -123,7 +119,7 @@ class WeakLimitHDPHLMPython(object):
         else:
             self._joblib_resample_states(self.states_list, num_procs)
 
-    def _joblib_resample_states(self,states_list,num_procs):
+    def _joblib_resample_states(self,states_list, num_procs):
         from joblib import Parallel, delayed
         from . import parallel
 
@@ -149,38 +145,18 @@ class WeakLimitHDPHLMPython(object):
     def _get_joblib_pair(self,states_obj):
         return (states_obj.data, states_obj._kwargs)
 
-    def resample_words(self):
-        for word_idx in range(self.num_states):
-            hsmm_states = [letter_state for letter_state in self.letter_hsmm.states_list if letter_state.word_idx == word_idx]
-            candidates = [tuple(letter_state.stateseq_norep) for letter_state in hsmm_states]
-            unique_candidates = list(set(candidates))
-            ref_array = np.array([unique_candidates.index(candi) for candi in candidates])
-            if len(candidates) == 0:
-                self._generate_word_and_set_at(word_idx)
-                continue
-            elif len(unique_candidates) == 1:
-                self.word_list[word_idx] = unique_candidates[0]
-                continue
-            cache_score = np.empty((len(unique_candidates), len(candidates)))
-            likelihoods = np.array([letter_state.log_likelihood() for letter_state in hsmm_states])
-            range_tmp = list(range(len(candidates)))
-
-            for candi_idx, candi in enumerate(unique_candidates):
-                tmp = range_tmp[:]
-                if (ref_array == candi_idx).sum() == 1:
-                    tmp.remove(np.where(ref_array == candi_idx)[0][0])
-                for tmp_idx in tmp:
-                    # print(hsmm_states[tmp_idx].likelihood_block_word(candi)[-1])
-                    cache_score[candi_idx, tmp_idx] = hsmm_states[tmp_idx].likelihood_block_word(candi)[-1]
-            cache_scores_matrix = cache_score[ref_array]
-            for i in range_tmp:
-                cache_scores_matrix[i, i] = 0.0
-            scores = cache_scores_matrix.sum(axis=1) + likelihoods
-
-            assert (np.exp(scores) >= 0).all(), cache_scores_matrix
-            sampled_candi_idx = sample_discrete(np.exp(scores))
-            self.word_list[word_idx] = candidates[sampled_candi_idx]
-
+    def resample_words(self, num_procs=0):
+        if num_procs == 0:
+            self.word_list = [self._resample_a_word(
+                [letter_state for letter_state in self.letter_hsmm.states_list if letter_state.word_idx == word_idx]
+            ) for word_idx in range(self.num_states)]
+        else:
+            from joblib import Parallel, delayed
+            self.word_list = Parallel(n_jobs=num_procs, backend='multiprocessing')\
+                ([delayed(self._resample_a_word)(
+                    [letter_state for letter_state in self.letter_hsmm.states_list if letter_state.word_idx == word_idx]
+                    ) for word_idx in range(self.num_states)]
+                )
         # Merge same letter seq which has different id.
         for i, word in enumerate(self.word_list):
             if word in self.word_list[:i]:
@@ -189,7 +165,39 @@ class WeakLimitHDPHLMPython(object):
                     stateseq, stateseq_norep = word_state.stateseq, word_state.stateseq_norep
                     word_state.stateseq[stateseq == i] = existed_id
                     word_state.stateseq_norep[stateseq_norep == i] = existed_id
-                    self._generate_word_and_set_at(i)
+                    word_candi = self.generate_word()
+                    while word_candi in self.word_list:
+                        word_candi = self.generate_word()
+                    self.word_list[i] = word_candi
+
+    def _resample_a_word(self, hsmm_states):
+        # hsmm_states = [letter_state for letter_state in self.letter_hsmm.states_list if letter_state.word_idx == word_idx]
+        candidates = [tuple(letter_state.stateseq_norep) for letter_state in hsmm_states]
+        unique_candidates = list(set(candidates))
+        ref_array = np.array([unique_candidates.index(candi) for candi in candidates])
+        if len(candidates) == 0:
+            return self.generate_word()
+        elif len(unique_candidates) == 1:
+            return unique_candidates[0]
+        cache_score = np.empty((len(unique_candidates), len(candidates)))
+        likelihoods = np.array([letter_state.log_likelihood() for letter_state in hsmm_states])
+        range_tmp = list(range(len(candidates)))
+
+        for candi_idx, candi in enumerate(unique_candidates):
+            tmp = range_tmp[:]
+            if (ref_array == candi_idx).sum() == 1:
+                tmp.remove(np.where(ref_array == candi_idx)[0][0])
+            for tmp_idx in tmp:
+                # print(hsmm_states[tmp_idx].likelihood_block_word(candi)[-1])
+                cache_score[candi_idx, tmp_idx] = hsmm_states[tmp_idx].likelihood_block_word(candi)[-1]
+        cache_scores_matrix = cache_score[ref_array]
+        for i in range_tmp:
+            cache_scores_matrix[i, i] = 0.0
+        scores = cache_scores_matrix.sum(axis=1) + likelihoods
+
+        assert (np.exp(scores) >= 0).all(), cache_scores_matrix
+        sampled_candi_idx = sample_discrete(np.exp(scores))
+        return candidates[sampled_candi_idx]
 
     def resample_length_distn(self):
         self.length_distn.resample(np.array([len(word) for word in self.word_list]))
