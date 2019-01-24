@@ -2,6 +2,7 @@
 # distutils: extra_compile_args = -std=c++11 -O3 -w -DNDEBUG -DHLM_TEMPS_ON_HEAP
 # distutils: include_dirs = deps/
 # cython: boundscheck = False
+# cython: language_level=3
 
 import numpy as np
 cimport numpy as np
