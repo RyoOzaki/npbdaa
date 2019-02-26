@@ -10,15 +10,14 @@ from pyhlm.internals import hlm_states
 class WeakLimitHDPHLMPython(object):
     _states_class = hlm_states.WeakLimitHDPHLMStatesPython
 
-    def __init__(self, hypparams, letter_hsmm, dur_distns, length_distn):
+    def __init__(self, num_states, alpha, gamma, init_state_concentration, letter_hsmm, dur_distns, length_distn):
         self._letter_hsmm = letter_hsmm
         self._length_distn = length_distn#Poisson(alpha_0=30, beta_0=10)
         self._dur_distns = dur_distns
-        self._num_states = hypparams['num_states']
+        self._num_states = num_states
         self._letter_num_states = letter_hsmm.num_states
-        self._init_state_distn = HMMInitialState(self, init_state_concentration=hypparams["init_state_concentration"])
-        hypparams.pop("init_state_concentration")
-        self._trans_distn = WeakLimitHDPHMMTransitions(**hypparams)
+        self._init_state_distn = HMMInitialState(self, init_state_concentration=init_state_concentration)
+        self._trans_distn = WeakLimitHDPHMMTransitions(num_states=num_states, alpha=alpha, gamma=gamma)
         self.states_list = []
 
         self.word_list = [None] * self.num_states
@@ -101,7 +100,7 @@ class WeakLimitHDPHLMPython(object):
 
     def resample_model(self, num_procs=0):
         self.letter_hsmm.states_list = []
-        [word_state.add_word_datas(generate=False) for word_state in self.states_list]
+        [state.add_word_datas(generate=False) for state in self.states_list]
         self.letter_hsmm.resample_states(num_procs=num_procs)
         [letter_state.reflect_letter_stateseq() for letter_state in self.letter_hsmm.states_list]
         self.resample_words(num_procs=num_procs)
@@ -115,7 +114,7 @@ class WeakLimitHDPHLMPython(object):
 
     def resample_states(self, num_procs=0):
         if num_procs == 0:
-            [word_state.resample() for word_state in self.states_list]
+            [state.resample() for state in self.states_list]
         else:
             self._joblib_resample_states(self.states_list, num_procs)
 
