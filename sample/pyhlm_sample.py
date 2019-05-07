@@ -62,7 +62,7 @@ if not os.path.exists('summary_files'):
 thread_num = 4
 pre_train_iter = 1
 train_iter = 100
-trunc = 60
+trunc = 100
 obs_dim = 3
 letter_upper = 10
 word_upper = 10
