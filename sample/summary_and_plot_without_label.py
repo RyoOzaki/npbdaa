@@ -37,6 +37,7 @@ def _plot_discreate_sequence(feature, title, sample_data, plotopts = {}, cmap = 
         ax = plt.subplot2grid((2, 1), (0, 0))
         plt.sca(ax)
         ax.plot(feature)
+        ax.set_xlim((0, feature.shape[0]-1))
         plt.ylabel('Feature')
         #label matrix
         ax = plt.subplot2grid((2, 1), (1, 0))
