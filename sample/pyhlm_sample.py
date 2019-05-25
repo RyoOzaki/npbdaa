@@ -95,7 +95,6 @@ if not os.path.exists('parameters'):
 if not os.path.exists('summary_files'):
     os.mkdir('summary_files')
 
-<<<<<<< HEAD
 #%% config parse
 config_parser = load_config(hypparams_model)
 section         = config_parser["model"]
@@ -105,27 +104,6 @@ train_iter      = section["train_iter"]
 word_num        = section["word_num"]
 letter_num      = section["letter_num"]
 observation_dim = ["observation_dim"]
-=======
-#%%
-thread_num = 4
-pre_train_iter = 1
-train_iter = 100
-trunc = 100
-obs_dim = 3
-letter_upper = 10
-word_upper = 10
-model_hypparams = {'num_states': word_upper, 'alpha': 10, 'gamma': 10, 'init_state_concentration': 10}
-obs_hypparams = {
-    'mu_0':np.zeros(obs_dim),
-    'sigma_0':np.identity(obs_dim),
-    'kappa_0':0.01,
-    'nu_0':obs_dim+2
-}
-dur_hypparams = {
-    'alpha_0':200,
-    'beta_0':10
-}
->>>>>>> 75bc1504bee9474020bfc02fc17289536259f2e4
 
 hlm_hypparams = load_config(hypparams_pyhlm)["pyhlm"]
 
