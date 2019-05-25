@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import matplotlib.cm as cm
 from tqdm import trange, tqdm
+<<<<<<< HEAD
 from sklearn.metrics import adjusted_rand_score
 from argparse import ArgumentParser
 from util.config_parser import ConfigParser_with_eval
@@ -26,6 +27,8 @@ def load_config(filename):
     cp = ConfigParser_with_eval()
     cp.read(filename)
     return cp
+=======
+>>>>>>> 75bc1504bee9474020bfc02fc17289536259f2e4
 
 #%%
 def get_names():
@@ -58,6 +61,10 @@ def _plot_discreate_sequence(feature, title, sample_data, plotopts = {}, cmap = 
         ax = plt.subplot2grid((2, 1), (0, 0))
         plt.sca(ax)
         ax.plot(feature)
+<<<<<<< HEAD
+=======
+        ax.set_xlim((0, feature.shape[0]-1))
+>>>>>>> 75bc1504bee9474020bfc02fc17289536259f2e4
         plt.ylabel('Feature')
         #label matrix
         ax = plt.subplot2grid((2, 1), (1, 0))
@@ -76,6 +83,7 @@ if not os.path.exists("figures"):
 if not os.path.exists("summary_files"):
     os.mkdir("summary_files")
 
+<<<<<<< HEAD
 #%% config parse
 print("Loading model config...")
 config_parser = load_config(hypparams_model)
@@ -84,6 +92,8 @@ word_num = section["word_num"]
 letter_num = section["letter_num"]
 print("Done!")
 
+=======
+>>>>>>> 75bc1504bee9474020bfc02fc17289536259f2e4
 #%%
 print("Loading results....")
 names = get_names()
@@ -97,11 +107,21 @@ log_likelihood = np.loadtxt("summary_files/log_likelihood.txt")
 resample_times = np.loadtxt("summary_files/resample_times.txt")
 print("Done!")
 
+<<<<<<< HEAD
 train_iter = l_results[0].shape[0]
 
 #%%
 lcolors = ListedColormap([cm.tab20(float(i)/letter_num) for i in range(letter_num)])
 wcolors = ListedColormap([cm.tab20(float(i)/word_num) for i in range(word_num)])
+=======
+L = 10
+S = 10
+T = l_results[0].shape[0]
+
+#%%
+lcolors = ListedColormap([cm.tab20(float(i)/L) for i in range(L)])
+wcolors = ListedColormap([cm.tab20(float(i)/S) for i in range(S)])
+>>>>>>> 75bc1504bee9474020bfc02fc17289536259f2e4
 
 #%%
 print("Plot results...")
@@ -120,13 +140,21 @@ print("Done!")
 #%%
 plt.clf()
 plt.title("Log likelihood")
+<<<<<<< HEAD
 plt.plot(range(train_iter+1), log_likelihood, ".-")
+=======
+plt.plot(range(T+1), log_likelihood, ".-")
+>>>>>>> 75bc1504bee9474020bfc02fc17289536259f2e4
 plt.savefig("figures/Log_likelihood.png")
 
 #%%
 plt.clf()
 plt.title("Resample times")
+<<<<<<< HEAD
 plt.plot(range(train_iter), resample_times, ".-")
+=======
+plt.plot(range(T), resample_times, ".-")
+>>>>>>> 75bc1504bee9474020bfc02fc17289536259f2e4
 plt.savefig("figures/Resample_times.png")
 
 #%%
