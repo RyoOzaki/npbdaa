@@ -31,16 +31,6 @@ def load_config(filename):
 def get_names():
     return np.loadtxt("files.txt", dtype=str)
 
-def get_letter_labels(names):
-    return _get_labels(names, "lab")
-
-def get_word_labels(names):
-    return _get_labels(names, "lab2")
-
-def _get_labels(names, ext):
-    return [np.loadtxt("LABEL/" + name + "." + ext) for name in names]
-
-
 def get_datas_and_length(names):
     datas = [np.loadtxt("DATA/" + name + ".txt") for name in names]
     length = [len(d) for d in datas]
@@ -64,6 +54,21 @@ def _joblib_get_results(names, lengths, c):
         return np.loadtxt("results/" + name + "_" + c + ".txt").reshape((-1, length))
     return Parallel(n_jobs=-1)([delayed(_component)(n, l, c) for n, l in zip(names, lengths)])
 
+def _plot_discreate_sequence(feature, title, sample_data, plotopts = {}, cmap = None):
+        ax = plt.subplot2grid((2, 1), (0, 0))
+        plt.sca(ax)
+        ax.plot(feature)
+        plt.ylabel('Feature')
+        #label matrix
+        ax = plt.subplot2grid((2, 1), (1, 0))
+        plt.suptitle(title)
+        plt.sca(ax)
+        ax.matshow(sample_data, aspect = 'auto', **plotopts, cmap=cmap)
+        #write x&y label
+        plt.xlabel('Frame')
+        plt.ylabel('Iteration')
+        plt.xticks(())
+
 #%%
 if not os.path.exists("figures"):
     os.mkdir("figures")
@@ -75,7 +80,6 @@ if not os.path.exists("summary_files"):
 print("Loading model config...")
 config_parser = load_config(hypparams_model)
 section = config_parser["model"]
-train_iter = section["train_iter"]
 word_num = section["word_num"]
 letter_num = section["letter_num"]
 print("Done!")
@@ -84,45 +88,34 @@ print("Done!")
 print("Loading results....")
 names = get_names()
 datas, length = get_datas_and_length(names)
-l_labels = get_letter_labels(names)
-w_labels = get_word_labels(names)
-concat_l_l = np.concatenate(l_labels, axis=0)
-concat_w_l = np.concatenate(w_labels, axis=0)
 
 l_results = get_results_of_letter(names, length)
 w_results = get_results_of_word(names, length)
 d_results = get_results_of_duration(names, length)
 
-concat_l_r = np.concatenate(l_results, axis=1)
-concat_w_r = np.concatenate(w_results, axis=1)
-
 log_likelihood = np.loadtxt("summary_files/log_likelihood.txt")
 resample_times = np.loadtxt("summary_files/resample_times.txt")
 print("Done!")
 
+train_iter = l_results[0].shape[0]
+
 #%%
+lcolors = ListedColormap([cm.tab20(float(i)/letter_num) for i in range(letter_num)])
+wcolors = ListedColormap([cm.tab20(float(i)/word_num) for i in range(word_num)])
 
-letter_ARI = np.zeros(train_iter)
-word_ARI = np.zeros(train_iter)
-
-#%% calculate ARI
-print("Calculating ARI...")
-for t in trange(train_iter):
-    letter_ARI[t] = adjusted_rand_score(concat_l_l, concat_l_r[t])
-    word_ARI[t] = adjusted_rand_score(concat_w_l, concat_w_r[t])
+#%%
+print("Plot results...")
+for i, name in enumerate(tqdm(names)):
+    plt.clf()
+    _plot_discreate_sequence(datas[i], name + "_l", l_results[i], cmap=lcolors)
+    plt.savefig("figures/" + name + "_l.png")
+    plt.clf()
+    _plot_discreate_sequence(datas[i], name + "_s", w_results[i], cmap=wcolors)
+    plt.savefig("figures/" + name + "_s.png")
+    plt.clf()
+    _plot_discreate_sequence(datas[i], name + "_d", d_results[i], cmap=cm.binary)
+    plt.savefig("figures/" + name + "_d.png")
 print("Done!")
-
-#%% plot ARIs.
-plt.clf()
-plt.title("Letter ARI")
-plt.plot(range(train_iter), letter_ARI, ".-")
-plt.savefig("figures/Letter_ARI.png")
-
-#%%
-plt.clf()
-plt.title("Word ARI")
-plt.plot(range(train_iter), word_ARI, ".-")
-plt.savefig("figures/Word_ARI.png")
 
 #%%
 plt.clf()
@@ -137,7 +130,5 @@ plt.plot(range(train_iter), resample_times, ".-")
 plt.savefig("figures/Resample_times.png")
 
 #%%
-np.savetxt("summary_files/Letter_ARI.txt", letter_ARI)
-np.savetxt("summary_files/Word_ARI.txt", word_ARI)
 with open("summary_files/Sum_of_resample_times.txt", "w") as f:
     f.write(str(np.sum(resample_times)))

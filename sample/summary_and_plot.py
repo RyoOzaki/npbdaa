@@ -6,6 +6,26 @@ from matplotlib.colors import ListedColormap
 import matplotlib.cm as cm
 from tqdm import trange, tqdm
 from sklearn.metrics import adjusted_rand_score
+from argparse import ArgumentParser
+from util.config_parser import ConfigParser_with_eval
+
+#%% parse arguments
+def arg_check(value, default):
+    return value if value else default
+
+default_hypparams_model = "hypparams/model.config"
+
+parser = ArgumentParser()
+parser.add_argument("--model", help=f"hyper parameters of model, default is [{default_hypparams_model}]")
+args = parser.parse_args()
+
+hypparams_model = arg_check(args.model, default_hypparams_model)
+
+#%%
+def load_config(filename):
+    cp = ConfigParser_with_eval()
+    cp.read(filename)
+    return cp
 
 #%%
 def get_names():
@@ -51,6 +71,14 @@ if not os.path.exists("figures"):
 if not os.path.exists("summary_files"):
     os.mkdir("summary_files")
 
+#%% config parse
+print("Loading model config...")
+config_parser = load_config(hypparams_model)
+section = config_parser["model"]
+word_num = section["word_num"]
+letter_num = section["letter_num"]
+print("Done!")
+
 #%%
 print("Loading results....")
 names = get_names()
@@ -68,18 +96,15 @@ log_likelihood = np.loadtxt("summary_files/log_likelihood.txt")
 resample_times = np.loadtxt("summary_files/resample_times.txt")
 print("Done!")
 
-L = 10
-S = 10
-T = l_results[0].shape[0]
+train_iter = l_results[0].shape[0]
 
 #%%
-
-letter_ARI = np.zeros(T)
-word_ARI = np.zeros(T)
+letter_ARI = np.zeros(train_iter)
+word_ARI = np.zeros(train_iter)
 
 #%%
-lcolors = ListedColormap([cm.tab20(float(i)/L) for i in range(L)])
-wcolors = ListedColormap([cm.tab20(float(i)/S) for i in range(S)])
+lcolors = ListedColormap([cm.tab20(float(i)/letter_num) for i in range(letter_num)])
+wcolors = ListedColormap([cm.tab20(float(i)/word_num) for i in range(word_num)])
 
 #%%
 print("Plot results...")
@@ -97,7 +122,7 @@ print("Done!")
 
 #%% calculate ARI
 print("Calculating ARI...")
-for t in trange(T):
+for t in trange(train_iter):
     letter_ARI[t] = adjusted_rand_score(concat_l_l, concat_l_r[t])
     word_ARI[t] = adjusted_rand_score(concat_w_l, concat_w_r[t])
 print("Done!")
@@ -105,23 +130,23 @@ print("Done!")
 #%% plot ARIs.
 plt.clf()
 plt.title("Letter ARI")
-plt.plot(range(T), letter_ARI, ".-")
+plt.plot(range(train_iter), letter_ARI, ".-")
 
 #%%
 plt.title("Word ARI")
 plt.clf()
-plt.plot(range(T), word_ARI, ".-")
+plt.plot(range(train_iter), word_ARI, ".-")
 
 #%%
 plt.clf()
 plt.title("Log likelihood")
-plt.plot(range(T+1), log_likelihood, ".-")
+plt.plot(range(train_iter+1), log_likelihood, ".-")
 plt.savefig("figures/Log_likelihood.png")
 
 #%%
 plt.clf()
 plt.title("Resample times")
-plt.plot(range(T), resample_times, ".-")
+plt.plot(range(train_iter), resample_times, ".-")
 plt.savefig("figures/Resample_times.png")
 
 #%%
