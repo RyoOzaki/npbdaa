@@ -26,7 +26,9 @@ do
   cp ${label}/${dir}/results/* results/
   cp ${label}/${dir}/summary_files/* summary_files/
 
+  # python summary_and_plot.py
   python summary_and_plot_light.py
+  # python summary_and_plot_without_label.py
 
   cp -r summary_files/ ${label}/${dir}/
   cp -r figures/ ${label}/${dir}/
@@ -38,7 +40,8 @@ rm -f figures/*
 rm -f results/*
 rm -f log.txt
 
-python summary_summary.py ${label} ${result_dirs}
+# python summary_summary.py ${label} ${result_dirs}
+python summary_summary_without_ARI.py ${label} ${result_dirs}
 
 cp -r summary_files ${label}
 cp -r figures ${label}

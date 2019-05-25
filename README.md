@@ -50,8 +50,10 @@ $ python setup.py install
 
 # Sample source
 There is a sample source of NPB-DAA in "sample" directory.
+Please run the "unroll_default_config" before run "pyhlm_sample", and you can change the hyperparameters using the config file "hypparams/defaults.config".
 ```
 $ cd sample
+$ python unroll_default_config.py
 $ python pyhlm_sample.py
 ```
 
