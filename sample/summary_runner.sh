@@ -40,8 +40,8 @@ rm -f figures/*
 rm -f results/*
 rm -f log.txt
 
-# python summary_summary.py ${label} ${result_dirs}
-python summary_summary_without_ARI.py ${label} ${result_dirs}
+python summary_summary.py ${label} ${result_dirs}
+# python summary_summary_without_ARI.py ${label} ${result_dirs}
 
 cp -r summary_files ${label}
 cp -r figures ${label}
