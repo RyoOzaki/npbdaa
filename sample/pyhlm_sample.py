@@ -12,9 +12,6 @@ from argparse import ArgumentParser
 from util.config_parser import ConfigParser_with_eval
 
 #%% parse arguments
-def arg_check(value, default):
-    return value if value else default
-
 default_hypparams_model = "hypparams/model.config"
 default_hypparams_letter_duration = "hypparams/letter_duration.config"
 default_hypparams_letter_hsmm = "hypparams/letter_hsmm.config"
@@ -24,22 +21,22 @@ default_hypparams_word_length = "hypparams/word_length.config"
 default_hypparams_superstate = "hypparams/superstate.config"
 
 parser = ArgumentParser()
-parser.add_argument("--model", help=f"hyper parameters of model, default is [{default_hypparams_model}]")
-parser.add_argument("--letter_duration", help=f"hyper parameters of letter duration, default is [{default_hypparams_letter_duration}]")
-parser.add_argument("--letter_hsmm", help=f"hyper parameters of letter HSMM, default is [{default_hypparams_letter_hsmm}]")
-parser.add_argument("--letter_observation", help=f"hyper parameters of letter observation, default is [{default_hypparams_letter_observation}]")
-parser.add_argument("--pyhlm", help=f"hyper parameters of pyhlm, default is [{default_hypparams_pyhlm}]")
-parser.add_argument("--word_length", help=f"hyper parameters of word length, default is [{default_hypparams_word_length}]")
-parser.add_argument("--superstate", help=f"hyper parameters of superstate, default is [{default_hypparams_superstate}]")
+parser.add_argument("--model", default=default_hypparams_model, help=f"hyper parameters of model, default is [{default_hypparams_model}]")
+parser.add_argument("--letter_duration", default=default_hypparams_letter_duration, help=f"hyper parameters of letter duration, default is [{default_hypparams_letter_duration}]")
+parser.add_argument("--letter_hsmm", default=default_hypparams_letter_hsmm, help=f"hyper parameters of letter HSMM, default is [{default_hypparams_letter_hsmm}]")
+parser.add_argument("--letter_observation", default=default_hypparams_letter_observation, help=f"hyper parameters of letter observation, default is [{default_hypparams_letter_observation}]")
+parser.add_argument("--pyhlm", default=default_hypparams_pyhlm, help=f"hyper parameters of pyhlm, default is [{default_hypparams_pyhlm}]")
+parser.add_argument("--word_length", default=default_hypparams_word_length, help=f"hyper parameters of word length, default is [{default_hypparams_word_length}]")
+parser.add_argument("--superstate", default=default_hypparams_superstate, help=f"hyper parameters of superstate, default is [{default_hypparams_superstate}]")
 args = parser.parse_args()
 
-hypparams_model = arg_check(args.model, default_hypparams_model)
-hypparams_letter_duration = arg_check(args.letter_duration, default_hypparams_letter_duration)
-hypparams_letter_hsmm = arg_check(args.letter_hsmm, default_hypparams_letter_hsmm)
-hypparams_letter_observation = arg_check(args.letter_observation, default_hypparams_letter_observation)
-hypparams_pyhlm = arg_check(args.pyhlm, default_hypparams_pyhlm)
-hypparams_word_length = arg_check(args.word_length, default_hypparams_word_length)
-hypparams_superstate = arg_check(args.superstate, default_hypparams_superstate)
+hypparams_model = args.model
+hypparams_letter_duration = args.letter_duration
+hypparams_letter_hsmm = args.letter_hsmm
+hypparams_letter_observation = args.letter_observation
+hypparams_pyhlm = args.pyhlm
+hypparams_word_length = args.word_length
+hypparams_superstate = args.superstate
 
 #%%
 def load_config(filename):
