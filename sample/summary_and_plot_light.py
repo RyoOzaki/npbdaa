@@ -5,9 +5,11 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import matplotlib.cm as cm
 from tqdm import trange, tqdm
-from sklearn.metrics import adjusted_rand_score
+from sklearn.metrics import adjusted_rand_score, f1_score
 from argparse import ArgumentParser
 from util.config_parser import ConfigParser_with_eval
+import warnings
+warnings.filterwarnings('ignore')
 
 #%% parse arguments
 def arg_check(value, default):
@@ -64,6 +66,18 @@ def _joblib_get_results(names, lengths, c):
         return np.loadtxt("results/" + name + "_" + c + ".txt").reshape((-1, length))
     return Parallel(n_jobs=-1)([delayed(_component)(n, l, c) for n, l in zip(names, lengths)])
 
+def _convert_label(truth, predict, N):
+    converted_label = np.full_like(truth, N)
+    for true_lab in range(N):
+        counted = [np.sum(predict[truth == true_lab] == pred) for pred in range(N)]
+        pred_lab = np.argmax(counted)
+        converted_label[predict == pred_lab] = true_lab
+    return converted_label
+
+def calc_f1_score(truth, predict, N, **kwargs):
+    converted_predict = _convert_label(truth, predict, N)
+    return f1_score(truth, converted_predict, labels=np.unique(converted_predict), **kwargs )
+
 #%%
 if not os.path.exists("figures"):
     os.mkdir("figures")
@@ -101,15 +115,22 @@ resample_times = np.loadtxt("summary_files/resample_times.txt")
 print("Done!")
 
 #%%
-
 letter_ARI = np.zeros(train_iter)
+letter_macro_f1_score = np.zeros(train_iter)
+letter_micro_f1_score = np.zeros(train_iter)
 word_ARI = np.zeros(train_iter)
+word_macro_f1_score = np.zeros(train_iter)
+word_micro_f1_score = np.zeros(train_iter)
 
 #%% calculate ARI
 print("Calculating ARI...")
 for t in trange(train_iter):
     letter_ARI[t] = adjusted_rand_score(concat_l_l, concat_l_r[t])
+    letter_macro_f1_score[t] = calc_f1_score(concat_l_l, concat_l_r[t], letter_num, average="macro")
+    letter_micro_f1_score[t] = calc_f1_score(concat_l_l, concat_l_r[t], letter_num, average="micro")
     word_ARI[t] = adjusted_rand_score(concat_w_l, concat_w_r[t])
+    word_macro_f1_score[t] = calc_f1_score(concat_w_l, concat_w_r[t], word_num, average="macro")
+    word_micro_f1_score[t] = calc_f1_score(concat_w_l, concat_w_r[t], word_num, average="micro")
 print("Done!")
 
 #%% plot ARIs.
@@ -138,6 +159,10 @@ plt.savefig("figures/Resample_times.png")
 
 #%%
 np.savetxt("summary_files/Letter_ARI.txt", letter_ARI)
+np.savetxt("summary_files/Letter_macro_F1_score.txt", letter_macro_f1_score)
+np.savetxt("summary_files/Letter_micro_F1_score.txt", letter_micro_f1_score)
 np.savetxt("summary_files/Word_ARI.txt", word_ARI)
+np.savetxt("summary_files/Word_macro_F1_score.txt", word_macro_f1_score)
+np.savetxt("summary_files/Word_micro_F1_score.txt", word_micro_f1_score)
 with open("summary_files/Sum_of_resample_times.txt", "w") as f:
     f.write(str(np.sum(resample_times)))
