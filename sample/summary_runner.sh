@@ -26,8 +26,8 @@ do
   cp ${label}/${dir}/results/* results/
   cp ${label}/${dir}/summary_files/* summary_files/
 
-  # python summary_and_plot.py
-  python summary_and_plot_light.py
+  python summary_and_plot.py
+  # python summary_and_plot_light.py
   # python summary_and_plot_without_label.py
 
   cp -r summary_files/ ${label}/${dir}/

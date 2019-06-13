@@ -55,21 +55,21 @@ def _joblib_get_results(names, lengths, c):
         return np.loadtxt("results/" + name + "_" + c + ".txt").reshape((-1, length))
     return Parallel(n_jobs=-1)([delayed(_component)(n, l, c) for n, l in zip(names, lengths)])
 
-def _plot_discreate_sequence(feature, title, sample_data, plotopts = {}, cmap = None):
-        ax = plt.subplot2grid((2, 1), (0, 0))
-        plt.sca(ax)
-        ax.plot(feature)
-        ax.set_xlim((0, feature.shape[0]-1))
-        plt.ylabel('Feature')
-        #label matrix
-        ax = plt.subplot2grid((2, 1), (1, 0))
-        plt.suptitle(title)
-        plt.sca(ax)
-        ax.matshow(sample_data, aspect = 'auto', **plotopts, cmap=cmap)
-        #write x&y label
-        plt.xlabel('Frame')
-        plt.ylabel('Iteration')
-        plt.xticks(())
+def _plot_discreate_sequence(feature, title, sample_data, cmap=None):
+    ax = plt.subplot2grid((2, 1), (0, 0))
+    plt.sca(ax)
+    ax.plot(feature)
+    ax.set_xlim((0, feature.shape[0]-1))
+    plt.ylabel('Feature')
+    #label matrix
+    ax = plt.subplot2grid((2, 1), (1, 0))
+    plt.suptitle(title)
+    plt.sca(ax)
+    ax.matshow(sample_data, aspect = 'auto', cmap=cmap)
+    #write x&y label
+    plt.xlabel('Frame')
+    plt.ylabel('Iteration')
+    plt.xticks(())
 
 #%%
 if not os.path.exists("figures"):
