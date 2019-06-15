@@ -30,7 +30,7 @@ do
   rm -f log.txt
 
   echo "#!/bin/bash" > continue.sh
-  echo "sh runner.sh -l ${label} -b ${begin} -e ${end}" >> continue.sh
+  echo "sh runner.sh -l ${label} -b ${i} -e ${end}" >> continue.sh
 
   python pyhlm_sample.py | tee log.txt
 

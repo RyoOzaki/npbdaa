@@ -83,7 +83,7 @@ def _plot_discreate_sequence(true_data, title, sample_data, cmap=None, cmap2=Non
     plt.sca(ax)
     if label_cmap is None:
         label_cmap = cmap
-    ax.matshow([true_data], aspect = 'auto', cmap=label_cmap)
+    ax.matshow([true_data], aspect='auto', cmap=label_cmap)
     plt.ylabel('Truth Label')
     #label matrix
     ax = plt.subplot2grid((10, 1), (2, 0), rowspan = 8)
@@ -91,7 +91,7 @@ def _plot_discreate_sequence(true_data, title, sample_data, cmap=None, cmap2=Non
     plt.sca(ax)
     if cmap2 is not None:
         cmap = cmap2
-    ax.matshow(sample_data, aspect = 'auto', cmap=cmap)
+    ax.matshow(sample_data, aspect='auto', cmap=cmap)
     #write x&y label
     plt.xlabel('Frame')
     plt.ylabel('Iteration')
