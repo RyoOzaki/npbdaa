@@ -146,7 +146,7 @@ class WeakLimitHDPHLMStatesPython(object):
         L = len(word)
         alphal = np.ones((tsize, L), dtype=np.float64) * -np.inf
 
-        return _log_likelihood_block_word(aBl, alDl, word, alphal)[:, -1]
+        return hlm_internal_hsmm_messages_forwards_log(aBl, alDl, word, alphal)[:, -1]
 
     def sample_forwards(self, betal, betastarl):
         T = self.T
@@ -217,7 +217,7 @@ class WeakLimitHDPHLMStates(WeakLimitHDPHLMStatesPython):
         return super(WeakLimitHDPHLMStates, self).messages_backwards()
 
     def likelihood_block_word(self, start, stop, word):
-        from pyhlm.internals.hlm_messages_interface import internal_messages_forwards_log
+        from pyhlm.internals.hlm_messages_interface import internal_hsmm_messages_forwards_log
         T = min(self.T, stop)
         tsize = T - start
         aBl = self.aBl[start:T]
@@ -228,12 +228,12 @@ class WeakLimitHDPHLMStates(WeakLimitHDPHLMStatesPython):
         if tsize - L + 1 <= 0:
             return alphal[:, -1]
 
-        return internal_messages_forwards_log(aBl, alDl, np.array(word, dtype=np.int32), alphal)[:, -1]
+        return internal_hsmm_messages_forwards_log(aBl, alDl, np.array(word, dtype=np.int32), alphal)[:, -1]
 
     def likelihood_block_word_python(self, start, stop, word):
         return super(WeakLimitHDPHLMStates, self).likelihood_block_word(start, stop, word)
 
-def _log_likelihood_block_word(aBl, alDl, word, alphal):
+def hlm_internal_hsmm_messages_forwards_log(aBl, alDl, word, alphal):
     T = alphal.shape[0]
     L = alphal.shape[1]
     alphal[:] = -np.inf

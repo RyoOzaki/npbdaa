@@ -16,7 +16,7 @@ namespace hlm
     using namespace nptypes;
 
     template <typename Type>
-    void internal_messages_forwards_log(
+    void internal_hsmm_messages_forwards_log(
       int T, int L, int P, Type *aBl, Type* alDl, int word[],
       Type *alphal)
     {
@@ -82,10 +82,10 @@ class hlmc
 {
     public:
 
-    static void internal_messages_forwards_log(
+    static void internal_hsmm_messages_forwards_log(
       int T, int L, int P, FloatType *aBl, FloatType *alDl, int word[],
       FloatType *alphal)
-    { hlm::internal_messages_forwards_log(T, L, P, aBl, alDl, word, alphal); }
+    { hlm::internal_hsmm_messages_forwards_log(T, L, P, aBl, alDl, word, alphal); }
 
 };
 
