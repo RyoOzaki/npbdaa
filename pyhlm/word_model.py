@@ -22,14 +22,14 @@ class LetterHSMMStatesPython(HSMMStatesPython):
         return self._word_idx
 
     def likelihood_block_word(self, word):
-        from pyhlm.internals.hlm_states import _log_likelihood_block_word
+        from pyhlm.internals.hlm_states import hlm_internal_hsmm_messages_forwards_log
         T = self.T
         aBl = self.aBl
         alDl = self.aDl
         L = len(word)
         alphal = np.empty((T, L), dtype=np.float64)
 
-        return _log_likelihood_block_word(aBl, alDl, word, alphal)[:, -1]
+        return hlm_internal_hsmm_messages_forwards_log(aBl, alDl, word, alphal)[:, -1]
 
     def reflect_letter_stateseq(self):
         if self._hlmstate is not None:
@@ -49,7 +49,7 @@ class LetterHSMMStatesPython(HSMMStatesPython):
 class LetterHSMMStatesEigen(HSMMStatesEigen, LetterHSMMStatesPython):
 
     def likelihood_block_word(self, word):
-        from pyhlm.internals.hlm_messages_interface import internal_messages_forwards_log
+        from pyhlm.internals.internal_hsmm_messages_interface import internal_hsmm_messages_forwards_log
         T = self.T
         aBl = self.aBl
         alDl = self.aDl
@@ -59,7 +59,7 @@ class LetterHSMMStatesEigen(HSMMStatesEigen, LetterHSMMStatesPython):
         if T - L + 1 <= 0:
             return alphal[:, -1]
 
-        return internal_messages_forwards_log(aBl, alDl, np.array(word, dtype=np.int32), alphal)[:, -1]
+        return internal_hsmm_messages_forwards_log(aBl, alDl, np.array(word, dtype=np.int32), alphal)[:, -1]
 
     def sample_forwards(self,betal,betastarl):
         from pyhsmm.internals.hsmm_messages_interface import sample_forwards_log
