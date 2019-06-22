@@ -49,7 +49,7 @@ class LetterHSMMStatesPython(HSMMStatesPython):
 class LetterHSMMStatesEigen(HSMMStatesEigen, LetterHSMMStatesPython):
 
     def likelihood_block_word(self, word):
-        from pyhlm.internals.hlm_messages_interface import internal_hsmm_messages_forwards_log
+        from pyhlm.internals.internal_hsmm_messages_interface import internal_hsmm_messages_forwards_log
         T = self.T
         aBl = self.aBl
         alDl = self.aDl

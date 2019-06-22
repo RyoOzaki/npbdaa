@@ -97,15 +97,21 @@ class WeakLimitHDPHLMStatesPython(object):
         return self._aBl
 
     @property
+    def trans_matrix(self):
+        return self.model.trans_distn.trans_matrix
+
+    @property
     def log_trans_matrix(self):
         if self._log_trans_matrix is None:
-            self._log_trans_matrix = np.log(self.model.trans_distn.trans_matrix)
+            self._log_trans_matrix = np.log(self.trans_matrix)
         return self._log_trans_matrix
 
     def resample(self):
         self.clear_caches()
+
         betal, betastarl, normalizerl = self.messages_backwards()
         self._normalizer = normalizerl
+
         return self.sample_forwards(betal, betastarl), normalizerl
 
     def messages_backwards(self):
@@ -116,17 +122,8 @@ class WeakLimitHDPHLMStatesPython(object):
         trunc = self.trunc if self.trunc is not None else T
         betal = np.zeros((T, self.model.num_states), dtype=np.float64)
         betastarl = np.zeros((T, self.model.num_states), dtype=np.float64)
-        normalizerl = 0.0
 
-        for t in range(T-1, -1, -1):
-            betastarl[t] = np.logaddexp.reduce(
-                betal[t:t+trunc] + self.cumulative_likelihoods(t, t+trunc) + aDl[:min(trunc, T-t)],
-                axis=0
-            )
-            betal[t-1] = np.logaddexp.reduce(betastarl[t] + log_trans_matrix, axis=1)
-        betal[-1] = 0.0
-        normalizerl = np.logaddexp.reduce(betastarl[0] + np.log(pi_0))
-        return betal, betastarl, normalizerl
+        return hlm_messages_backwards_log(self.cumulative_likelihoods, aDl, log_trans_matrix, pi_0, trunc, betal, betastarl)
 
     def cumulative_likelihoods(self, start, stop):
         T = min(self.T, stop)
@@ -151,48 +148,15 @@ class WeakLimitHDPHLMStatesPython(object):
     def sample_forwards(self, betal, betastarl):
         T = self.T
         aD = np.exp(self.aDl)
-        log_trans_matrix = self.log_trans_matrix
-        stateseq = self._stateseq[:]
-        stateseq[:] = -1
-        letter_stateseq = self._letter_stateseq[:]
-        letter_stateseq[:] = -1
-        stateseq_norep = []
-        durations_censored = []
-        t = 0
-        nextstate_unsmoothed = self.pi_0
-        while t < T:
-            logdomain = betastarl[t] - betastarl[t].max()
-            nextstate_dist = np.exp(logdomain) * nextstate_unsmoothed
-            if (nextstate_dist == 0.).all():
-                nextstate_dist = np.exp(logdomain)
+        self._letter_stateseq[:] = -1
+        stateseq, stateseq_norep, durations_censored = hlm_sample_forwards_log(
+            self.likelihood_block_word, self.trans_matrix, self.pi_0, self.aDl, self.model.word_list,
+            betal, betastarl,
+            np.empty(T, dtype=np.int32),[], [])
 
-            state = sample_discrete(nextstate_dist)
-            durprob = np.random.random()
-            # dur = len(self.model.word_list[state])
-            cache_mess_term = np.exp(self.likelihood_block_word(t, T, self.model.word_list[state]) + betal[t:T, state] - betastarl[t, state])
-
-            dur = 0
-            while durprob > 0 and t+dur < T:
-                # p_d_prior = aD[dur, state] if t + dur < T else 1.
-                p_d_prior = aD[dur, state]
-                assert not np.isnan(p_d_prior)
-                assert p_d_prior >= 0
-
-                p_d = cache_mess_term[dur] * p_d_prior
-                assert not np.isnan(p_d)
-                durprob -= p_d
-                dur += 1
-
-            assert dur > 0
-            assert dur >= len(self.model.word_list[state])
-            stateseq[t:t+dur] = state
-            nextstate_unsmoothed = nextstate_dist[state]
-            t += dur
-
-            stateseq_norep.append(state)
-            durations_censored.append(dur)
-        self._stateseq_norep = np.array(stateseq_norep, dtype=np.int32)
-        self._durations_censored = np.array(durations_censored, dtype=np.int32)
+        self._stateseq = stateseq
+        self._stateseq_norep = stateseq_norep
+        self._durations_censored = durations_censored
         return self.stateseq, self.stateseq_norep, self.durations_censored
 
     def clear_caches(self):
@@ -211,13 +175,39 @@ class WeakLimitHDPHLMStatesPython(object):
 class WeakLimitHDPHLMStates(WeakLimitHDPHLMStatesPython):
 
     def messages_backwards(self):
-        return super(WeakLimitHDPHLMStates, self).messages_backwards()
+        # return self.messages_backwards_python()
+        from pyhlm.internals.hlm_messages_interface import messages_backwards_log
+        aDl = self.aDl
+        aBl = self.aBl
+        alDl = self.alDl
+        log_trans_matrix = self.log_trans_matrix
+        words = np.concatenate([np.array(word, dtype=np.int32) for word in self.model.word_list])
+        Ls = np.array([len(word) for word in self.model.word_list], dtype=np.int32)
+        cLs = np.concatenate(([0], np.cumsum(Ls)[:-1])).astype(np.int32)
+        Lmax = Ls.max()
+        N = self.model.num_states
+        T = self.T
+        pi_0 = self.pi_0
+        trunc = self.trunc if self.trunc is not None else T
+        betal, betastarl = messages_backwards_log(
+            aBl, aDl, alDl, log_trans_matrix,
+            words, Ls, cLs, Lmax, trunc,
+            np.zeros((T, self.model.num_states), dtype=np.float64),
+            np.zeros((T, self.model.num_states), dtype=np.float64)
+        )
+
+        assert not np.isnan(betal).any()
+        assert not np.isnan(betastarl).any()
+
+        normalizerl = np.logaddexp.reduce(betastarl[0] + np.log(pi_0))
+
+        return betal, betastarl, normalizerl
 
     def messages_backwards_python(self):
         return super(WeakLimitHDPHLMStates, self).messages_backwards()
 
     def likelihood_block_word(self, start, stop, word):
-        from pyhlm.internals.hlm_messages_interface import internal_hsmm_messages_forwards_log
+        from pyhlm.internals.internal_hsmm_messages_interface import internal_hsmm_messages_forwards_log
         T = min(self.T, stop)
         tsize = T - start
         aBl = self.aBl[start:T]
@@ -250,3 +240,56 @@ def hlm_internal_hsmm_messages_forwards_log(aBl, alDl, word, alphal):
             cumsum_aBl[:t+1] += aBl[t+j+1, l]
             alphal[t+j+1, j+1] = np.logaddexp.reduce(cumsum_aBl[:t+1] + alDl[t::-1, l] + alphal[j:t+j+1, j])
     return alphal
+
+def hlm_messages_backwards_log(cumulative_likelihoods_func, aDl, log_trans_matrix, pi_0, trunc, betal, betastarl):
+    T = betal.shape[0]
+
+    for t in range(T-1, -1, -1):
+        betastarl[t] = np.logaddexp.reduce(
+            betal[t:t+trunc] + cumulative_likelihoods_func(t, t+trunc) + aDl[:min(trunc, T-t)],
+            axis=0
+        )
+        betal[t-1] = np.logaddexp.reduce(betastarl[t] + log_trans_matrix, axis=1)
+    betal[-1] = 0.0
+    normalizerl = np.logaddexp.reduce(betastarl[0] + np.log(pi_0))
+    return betal, betastarl, normalizerl
+
+def hlm_sample_forwards_log(likelihood_block_word_func, trans_matrix, pi_0, aDl, word_list, betal, betastarl, stateseq, stateseq_norep, durations_censored):
+    stateseq[:] = -1
+    T = betal.shape[0]
+    t = 0
+    aD = np.exp(aDl)
+    nextstate_unsmoothed = pi_0
+    while t < T:
+        logdomain = betastarl[t] - betastarl[t].max()
+        nextstate_dist = np.exp(logdomain) * nextstate_unsmoothed
+        if (nextstate_dist == 0.).all():
+            nextstate_dist = np.exp(logdomain)
+
+        state = sample_discrete(nextstate_dist)
+        durprob = np.random.random()
+        cache_mess_term = np.exp(likelihood_block_word_func(t, T, word_list[state]) + betal[t:T, state] - betastarl[t, state])
+
+        dur = 0
+        while durprob > 0 and t+dur < T:
+            # p_d_prior = aD[dur, state] if t + dur < T else 1.
+            p_d_prior = aD[dur, state]
+            assert not np.isnan(p_d_prior)
+            assert p_d_prior >= 0
+
+            p_d = cache_mess_term[dur] * p_d_prior
+            assert not np.isnan(p_d)
+            durprob -= p_d
+            dur += 1
+
+        assert dur > 0
+        assert dur >= len(word_list[state])
+        stateseq[t:t+dur] = state
+        nextstate_unsmoothed = trans_matrix[state]
+        t += dur
+
+        stateseq_norep.append(state)
+        durations_censored.append(dur)
+    stateseq_norep = np.array(stateseq_norep, dtype=np.int32)
+    durations_censored = np.array(durations_censored, dtype=np.int32)
+    return stateseq, stateseq_norep, durations_censored
