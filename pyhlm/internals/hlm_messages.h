@@ -90,20 +90,21 @@ namespace hlm
         for(int tau=0; tau<tsize; tau++){
           result = ebetal.row(t+tau) + cum_ealphal.row(tau) + eaDl.row(tau);
           maxes = ebetastarl.row(t).cwiseMax(result);
+          ebetastarl.row(t) = ((ebetastarl.row(t) - maxes).exp() + (result - maxes).exp()).log() + maxes;
           for(int nu=0; nu<N; nu++){
-            if(isinf(maxes(nu))){
-              maxes(nu) = 0.0;
+            if(ebetastarl(t, nu) != ebetastarl(t, nu)){
+              ebetastarl(t, nu) = neg_inf;
             }
           }
-          ebetastarl.row(t) = ((ebetastarl.row(t) - maxes).exp() + (result - maxes).exp()).log() + maxes;
 
         }
         if(t-1 >= 0){
           for(int nu=0; nu<N; nu++){
             result = ebetastarl.row(t) + eAl.row(nu);
             cmax = result.maxCoeff();
-            if(!isinf(cmax)){
-              ebetal(t-1, nu) = log((result - cmax).exp().sum()) + cmax;
+            ebetal(t-1, nu) = log((result - cmax).exp().sum()) + cmax;
+            if(ebetal(t-1, nu) != ebetal(t-1, nu)){
+              ebetal(t-1, nu) = neg_inf;
             }
           }
         }
