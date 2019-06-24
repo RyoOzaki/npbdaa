@@ -1,4 +1,5 @@
 import numpy as np
+from functools import reduce
 
 from pyhsmm.util.stats import sample_discrete
 from pyhsmm.util.general import rle
@@ -108,10 +109,8 @@ class WeakLimitHDPHLMStatesPython(object):
 
     def resample(self):
         self.clear_caches()
-
         betal, betastarl, normalizerl = self.messages_backwards()
         self._normalizer = normalizerl
-
         return self.sample_forwards(betal, betastarl), normalizerl
 
     def messages_backwards(self):
@@ -175,13 +174,8 @@ class WeakLimitHDPHLMStatesPython(object):
 class WeakLimitHDPHLMStates(WeakLimitHDPHLMStatesPython):
 
     def messages_backwards(self):
-        # return self.messages_backwards_python()
         from pyhlm.internals.hlm_messages_interface import messages_backwards_log
-        aDl = self.aDl
-        aBl = self.aBl
-        alDl = self.alDl
-        log_trans_matrix = self.log_trans_matrix
-        words = np.concatenate([np.array(word, dtype=np.int32) for word in self.model.word_list])
+        words = np.array(reduce(lambda a, b: a + b, self.model.word_list), dtype=np.int32)
         Ls = np.array([len(word) for word in self.model.word_list], dtype=np.int32)
         cLs = np.concatenate(([0], np.cumsum(Ls)[:-1])).astype(np.int32)
         Lmax = Ls.max()
@@ -190,7 +184,7 @@ class WeakLimitHDPHLMStates(WeakLimitHDPHLMStatesPython):
         pi_0 = self.pi_0
         trunc = self.trunc if self.trunc is not None else T
         betal, betastarl = messages_backwards_log(
-            aBl, aDl, alDl, log_trans_matrix,
+            self.aBl, self.aDl, self.alDl, self.log_trans_matrix,
             words, Ls, cLs, Lmax, trunc,
             np.zeros((T, self.model.num_states), dtype=np.float64),
             np.zeros((T, self.model.num_states), dtype=np.float64)

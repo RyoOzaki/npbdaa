@@ -44,10 +44,11 @@ namespace internal_hsmm
 
       Type ctmp = 0.0;
       for(int t=0; t<T-L+1; t++){
-        ctmp = ctmp + eaBl(t, word[0]);
+        ctmp += eaBl(t, word[0]);
         ealphal(t, 0) = ctmp + ealDl(t, word[0]);
       }
 
+      Type cmax;
       for(int j=0; j<L-1; j++){
         sumsofar.setZero();
         for(int t=0; t<T-L+1; t++){
@@ -55,8 +56,8 @@ namespace internal_hsmm
             sumsofar(tau) = sumsofar(tau) + eaBl(t+j+1, word[j+1]);
             result(tau) = sumsofar(tau) + ealDl(t-tau, word[j+1]) + ealphal(j+tau, j);
           }
-          ctmp = result.head(t+1).maxCoeff();
-          ealphal(t+j+1, j+1) = log((result.head(t+1) - ctmp).exp().sum()) + ctmp;
+          cmax = result.head(t+1).maxCoeff();
+          ealphal(t+j+1, j+1) = log((result.head(t+1) - cmax).exp().sum()) + cmax;
         }
       }
     }
