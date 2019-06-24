@@ -12,6 +12,7 @@
 namespace hlm
 {
     using namespace std;
+    using namespace util;
     using namespace Eigen;
     using namespace nptypes;
 
@@ -58,14 +59,15 @@ namespace hlm
 #endif
 
       //initialize.
-      ebetal.setConstant(-1.0*numeric_limits<Type>::infinity());
-      ebetastarl.setConstant(-1.0*numeric_limits<Type>::infinity());
+      Type neg_inf = -1.0*numeric_limits<Type>::infinity();
+      ebetal.setConstant(neg_inf);
+      ebetastarl.setConstant(neg_inf);
       ebetal.row(T-1).setZero();
 
       for(int t=T-1; t>=0; t--){
         tsize = min(itrunc, T-t);
         for(int i=0; i<N; i++){
-          ealphal.setConstant(-1.0*numeric_limits<Type>::infinity());
+          ealphal.setConstant(neg_inf);
           ctmp = 0.0;
           for(int tt=0; tt<tsize-Ls[i]+1; tt++){
             ctmp = ctmp + eaBl(t+tt, words[cLs[i]]);
@@ -88,20 +90,20 @@ namespace hlm
         for(int tau=0; tau<tsize; tau++){
           result = ebetal.row(t+tau) + cum_ealphal.row(tau) + eaDl.row(tau);
           maxes = ebetastarl.row(t).cwiseMax(result);
-          ebetastarl.row(t) = ((ebetastarl.row(t) - maxes).exp() + (result - maxes).exp()).log() + maxes;
           for(int nu=0; nu<N; nu++){
-            if(ebetastarl(t, nu) != ebetastarl(t, nu)){
-              ebetastarl(t, nu) = -1.0*numeric_limits<Type>::infinity();
+            if(isinf(maxes(nu))){
+              maxes(nu) = 0.0;
             }
           }
+          ebetastarl.row(t) = ((ebetastarl.row(t) - maxes).exp() + (result - maxes).exp()).log() + maxes;
+
         }
         if(t-1 >= 0){
           for(int nu=0; nu<N; nu++){
             result = ebetastarl.row(t) + eAl.row(nu);
             cmax = result.maxCoeff();
-            ebetal(t-1, nu) = log((result - cmax).exp().sum()) + cmax;
-            if(ebetal(t-1, nu) != ebetal(t-1, nu)){
-              ebetal(t-1, nu) = -1.0*numeric_limits<Type>::infinity();
+            if(!isinf(cmax)){
+              ebetal(t-1, nu) = log((result - cmax).exp().sum()) + cmax;
             }
           }
         }
