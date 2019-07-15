@@ -98,7 +98,7 @@ namespace hlm
           }
 
         }
-        if(t-1 >= 0){
+        if(likely(t > 0)){
           for(int nu=0; nu<N; nu++){
             result = ebetastarl.row(t) + eAl.row(nu);
             cmax = result.maxCoeff();
