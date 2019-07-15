@@ -82,6 +82,9 @@ namespace hlm
               }
               cmax = result_alpha.head(tt+1).maxCoeff();
               ealphal(tt+j+1, j+1) = log((result_alpha.head(tt+1) - cmax).exp().sum()) + cmax;
+              if(ealphal(tt+j+1, j+1) != ealphal(tt+j+1, j+1)){
+                ealphal(tt+j+1, j+1) = neg_inf;
+              }
             }
           }
           cum_ealphal.col(i) = ealphal.col(Ls[i]-1);
