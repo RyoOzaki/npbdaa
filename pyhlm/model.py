@@ -104,7 +104,7 @@ class WeakLimitHDPHLMPython(object):
         self.letter_hsmm.resample_states(num_procs=num_procs)
         [letter_state.reflect_letter_stateseq() for letter_state in self.letter_hsmm.states_list]
         self.resample_words(num_procs=num_procs)
-        self.letter_hsmm.resample_parameters()
+        self.letter_hsmm.resample_parameters_by_sampled_words(self.word_list)
         self.resample_length_distn()
         self.resample_dur_distns()
         self.resample_trans_distn()
