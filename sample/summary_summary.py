@@ -92,6 +92,24 @@ plt.ylabel("Micro F1 score")
 plt.title("Transitions of the micro F1 score")
 plt.legend()
 plt.savefig("figures/summary_of_micro_F1_score.png")
+
+plt.clf()
+ll = log_likelihoods[:, -1]
+lARI = letter_ARIs[:, -1]
+wARI = word_ARIs[:, -1]
+letter_slope, letter_intercept, letter_r_value, _, _ = stats.linregress(ll, lARI)
+word_slope, word_intercept, word_r_value, _, _ = stats.linregress(ll, wARI)
+plt.plot(ll, lARI, ".", color="tab:orange")
+plt.plot(ll, wARI, ".", color="tab:blue")
+left, right = plt.xlim()
+left_and_right = np.array([left, right])
+plt.plot(left_and_right, left_and_right*letter_slope+letter_intercept, "--", color="tab:orange", label=f"letter correlation:{letter_r_value:.3f}")
+plt.plot(left_and_right, left_and_right*word_slope+word_intercept, "--", color="tab:blue", label=f"word correlation:{word_r_value:.3f}")
+plt.xlabel("Log-likelihood")
+plt.ylabel("Adjusted Rand index")
+plt.title("Correlation between log-likelihood and ARI")
+plt.legend()
+plt.savefig("figures/correlation.png")
 print("Done!")
 
 #%%
