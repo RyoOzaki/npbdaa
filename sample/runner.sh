@@ -14,6 +14,9 @@ do
 done
 
 mkdir -p ${label}
+cp -ru DATA/ ${label}/
+cp -ru LABEL/ ${label}/
+cp -ru hypparams/ ${label}/
 
 mkdir -p results
 mkdir -p parameters
@@ -42,7 +45,4 @@ do
 
 done
 
-rm -f results/*
-rm -f parameters/*
-rm -f summary_files/*
-rm -f log.txt
+sh clean.sh
