@@ -8,7 +8,7 @@ killpstree(){
       kill -STOP $child
       killpstree $child
   done
-  kill $1
+  kill -INT $1
 }
 
 INTERVAL=300 # sec
@@ -55,7 +55,7 @@ PID=$!
 echo "done!" >> ${WATCHDOG_LOG}
 echo "PID=${PID}" >> ${WATCHDOG_LOG}
 
-trap 'echo "shutdown watchdog..." >> ${WATCHDOG_LOG}; killpstree ${PID}; exit 1'  1 2 3 15
+trap 'echo "shutdown watchdog" >> ${WATCHDOG_LOG}; killpstree ${PID}; exit 1'  1 2 3 15
 
 sleep ${INTERVAL}
 
@@ -73,7 +73,7 @@ while [ `ps -a | grep "${PID}" -o` ] ; do
     sh continue.sh &
     PID=$!
     echo "done!" >> ${WATCHDOG_LOG}
-    echo "PID=${PID}"
+    echo "PID=${PID}" >> ${WATCHDOG_LOG}
   fi
 
   sleep ${INTERVAL}
