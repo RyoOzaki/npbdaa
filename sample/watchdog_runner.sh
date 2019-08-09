@@ -7,7 +7,7 @@ killpstree(){
   do
       killpstree $child
   done
-  kill -SIGKILL $1
+  kill -SIGINT $1
 }
 
 INTERVAL=300 # sec
