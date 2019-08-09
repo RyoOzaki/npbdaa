@@ -1,14 +1,13 @@
 #!/bin/bash
 
 killpstree(){
-  kill -STOP $1
+  kill -SIGSTOP $1
   children=`ps --ppid $1 --no-heading | awk '{ print $1 }'`
   for child in $children
   do
-      kill -STOP $child
       killpstree $child
   done
-  kill -INT $1
+  kill -SIGKILL $1
 }
 
 INTERVAL=300 # sec
