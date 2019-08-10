@@ -31,6 +31,7 @@ do
   rm -f parameters/*
   rm -f summary_files/*
   rm -f log.txt
+  touch log.txt
 
   echo "#!/bin/bash" > continue.sh
   echo "sh runner.sh -l ${label} -b ${i} -e ${end}" >> continue.sh
