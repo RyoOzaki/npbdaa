@@ -18,3 +18,18 @@ def _get_sampled_stateseq_norep_and_durations_censored(idx):
         states_list.append(model.states_list.pop())
 
     return [(s.stateseq, s.stateseq_norep, s.durations_censored, s.log_likelihood()) for s in states_list]
+
+def _get_prosodic_sampled_stateseq_norep_and_durations_censored(idx):
+    grp = args[idx]
+
+    if len(grp) == 0:
+        return []
+
+    datas, pdatas, kwargss = zip(*grp)
+
+    states_list = []
+    for data, pdata, kwargs in zip(datas, pdatas, kwargss):
+        model.add_data(data=data, prosody_data=pdata, initialize_from_prior=False, **kwargs)
+        states_list.append(model.states_list.pop())
+
+    return [(s.stateseq, s.stateseq_norep, s.durations_censored, s.log_likelihood()) for s in states_list]
