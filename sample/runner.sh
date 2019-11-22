@@ -46,11 +46,7 @@ do
 
 done
 
-<<<<<<< HEAD
-sh clean.sh
-=======
 rm -f results/*
 rm -rf parameters/*
 rm -f summary_files/*
 rm -f log.txt
->>>>>>> develop
