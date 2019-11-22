@@ -69,7 +69,8 @@ class WeakLimitHDPHLMPython(object):
         letter_hsmm_params = self.letter_hsmm.params
         bigram_params = {**self.init_state_distn.params, "trans_matrix": self.trans_distn.trans_matrix}
         length_params = self.length_distn.params
-        return {"num_states": self.num_states, "word_list": self.word_list, "letter_hsmm": letter_hsmm_params, "word_length": length_params, "bigram": bigram_params}
+        word_dicts = {f"word({i})": np.array(word) for i, word in enumerate(self.word_list)}
+        return {"num_states": self.num_states, "word_dicts": word_dicts, "letter_hsmm": letter_hsmm_params, "word_length": length_params, "bigram": bigram_params}
 
     @property
     def hypparams(self):

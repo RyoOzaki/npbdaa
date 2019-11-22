@@ -71,29 +71,77 @@ def save_stateseq(model):
         with open("results/" + names[i] + "_d.txt", "a") as f:
             np.savetxt(f, unpack_durations(s.durations_censored))
 
-def save_params(itr_idx, model):
+def save_params_as_text(itr_idx, model):
     with open("parameters/ITR_{0:04d}.txt".format(itr_idx), "w") as f:
         f.write(str(model.params))
 
-def save_each_params_as_file(iter_idx, model):
+def save_params_as_file(iter_idx, model):
     params = model.params
     root_dir = Path("parameters/ITR_{0:04d}".format(iter_idx))
     root_dir.mkdir(exist_ok=True)
     save_json(root_dir, params)
 
 def save_json(root_dir, json_obj):
-    for keyname in json_obj:
-        subjson = json_obj[keyname]
-        if type(subjson) == dict:
+    for keyname, subjson in json_obj.items():
+        type_of_subjson = type(subjson)
+        if type_of_subjson == dict:
             dir = root_dir / keyname
             dir.mkdir(exist_ok=True)
             save_json(dir, json_obj[keyname])
         else:
             savefile = root_dir / f"{keyname}.txt"
-            if type(subjson) == np.ndarray:
-                np.savetxt(savefile, subjson)
+            if type_of_subjson == np.ndarray:
+                if subjson.dtype in [np.int8, np.int16, np.int32, np.int64, np.uint8, np.uint16, np.uint32, np.uint64]:
+                    np.savetxt(savefile, subjson, fmt="%d")
+                else:
+                    np.savetxt(savefile, subjson)
             else:
                 savefile.write_text(str(subjson))
+
+def save_params_as_npz(iter_idx, model):
+    params = model.params
+    flatten_params = flatten_json(params)
+    # flatten_params = copy_flatten_json(flatten_params)
+    np.savez(f"parameters/ITR_{iter_idx:04d}.npz", **flatten_params)
+
+def flatten_json(json_obj, keyname_prefix=None, dict_obj=None):
+    if dict_obj is None:
+        dict_obj = {}
+    if keyname_prefix is None:
+        keyname_prefix = ""
+    for keyname, subjson in json_obj.items():
+        if type(subjson) == dict:
+            prefix = f"{keyname_prefix}{keyname}/"
+            flatten_json(subjson, keyname_prefix=prefix, dict_obj=dict_obj)
+        else:
+            dict_obj[f"{keyname_prefix}{keyname}"] = subjson
+    return dict_obj
+
+def unflatten_json(flatten_json_obj):
+    dict_obj = {}
+    for keyname, value in flatten_json_obj.items():
+        current_dict = dict_obj
+        splitted_keyname = keyname.split("/")
+        for key in splitted_keyname[:-1]:
+            if key not in current_dict:
+                current_dict[key] = {}
+            current_dict = current_dict[key]
+        current_dict[splitted_keyname[-1]] = value
+    return dict_obj
+
+def copy_flatten_json(json_obj):
+    new_json = {}
+    for keyname, subjson in json_obj.items():
+        type_of_subjson = type(subjson)
+        if type_of_subjson in [int, float, complex, bool]:
+            new_json[keyname] = subjson
+        elif type_of_subjson in [list, tuple]:
+            new_json[keyname] = subjson[:]
+        elif type_of_subjson == np.ndarray:
+            new_json[keyname] = subjson.copy()
+        else:
+            raise NotImplementedError(f"type :{type_of_subjson} can not copy. Plz implement here!")
+    return new_json
 
 def save_loglikelihood(model):
     with open("summary_files/log_likelihood.txt", "a") as f:
@@ -168,7 +216,9 @@ model.resample_states(num_procs=thread_num)
 print("Done!")
 
 #%% Save init params
-save_each_params_as_file(0, model)
+# save_params_as_text(0, model)
+# save_params_as_file(0, model)
+save_params_as_npz(0, model)
 save_loglikelihood(model)
 
 #%%
@@ -178,9 +228,11 @@ for t in trange(train_iter):
     resample_model_time = time.time() - st
     save_stateseq(model)
     save_loglikelihood(model)
-    save_each_params_as_file(t+1, model)
+    # save_params_as_text(t+1, model)
+    # save_params_as_file(t+1, model)
+    save_params_as_npz(t+1, model)
     save_resample_times(resample_model_time)
-    print(model.word_list)
-    print(model.word_counts())
+    # print(model.word_list)
+    # print(model.word_counts())
     print(f"log_likelihood:{model.log_likelihood()}")
     print(f"resample_model:{resample_model_time}")
