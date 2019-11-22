@@ -28,7 +28,7 @@ do
 
   i_str=$( printf '%02d' $i )
   rm -f results/*
-  rm -f parameters/*
+  rm -rf parameters/*
   rm -f summary_files/*
   rm -f log.txt
   touch log.txt
@@ -46,4 +46,11 @@ do
 
 done
 
+<<<<<<< HEAD
 sh clean.sh
+=======
+rm -f results/*
+rm -rf parameters/*
+rm -f summary_files/*
+rm -f log.txt
+>>>>>>> develop

@@ -10,6 +10,7 @@ warnings.filterwarnings('ignore')
 import time
 from argparse import ArgumentParser
 from util.config_parser import ConfigParser_with_eval
+from pathlib import Path
 
 #%% parse arguments
 default_hypparams_model = "hypparams/model.config"
@@ -73,6 +74,26 @@ def save_stateseq(model):
 def save_params(itr_idx, model):
     with open("parameters/ITR_{0:04d}.txt".format(itr_idx), "w") as f:
         f.write(str(model.params))
+
+def save_each_params_as_file(iter_idx, model):
+    params = model.params
+    root_dir = Path("parameters/ITR_{0:04d}".format(iter_idx))
+    root_dir.mkdir(exist_ok=True)
+    save_json(root_dir, params)
+
+def save_json(root_dir, json_obj):
+    for keyname in json_obj:
+        subjson = json_obj[keyname]
+        if type(subjson) == dict:
+            dir = root_dir / keyname
+            dir.mkdir(exist_ok=True)
+            save_json(dir, json_obj[keyname])
+        else:
+            savefile = root_dir / f"{keyname}.txt"
+            if type(subjson) == np.ndarray:
+                np.savetxt(savefile, subjson)
+            else:
+                savefile.write_text(str(subjson))
 
 def save_loglikelihood(model):
     with open("summary_files/log_likelihood.txt", "a") as f:
@@ -147,7 +168,7 @@ model.resample_states(num_procs=thread_num)
 print("Done!")
 
 #%% Save init params
-save_params(0, model)
+save_each_params_as_file(0, model)
 save_loglikelihood(model)
 
 #%%
@@ -157,7 +178,7 @@ for t in trange(train_iter):
     resample_model_time = time.time() - st
     save_stateseq(model)
     save_loglikelihood(model)
-    save_params(t+1, model)
+    save_each_params_as_file(t+1, model)
     save_resample_times(resample_model_time)
     print(model.word_list)
     print(model.word_counts())
