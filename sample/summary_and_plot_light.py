@@ -1,5 +1,4 @@
 #%%
-import os
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
@@ -79,11 +78,8 @@ def calc_f1_score(truth, predict, N, **kwargs):
     return f1_score(truth, converted_predict, labels=np.unique(converted_predict), **kwargs )
 
 #%%
-if not os.path.exists("figures"):
-    os.mkdir("figures")
-
-if not os.path.exists("summary_files"):
-    os.mkdir("summary_files")
+Path("figures").mkdir(exist_ok=True)
+Path("summary_files").mkdir(exist_ok=True)
 
 #%% config parse
 print("Loading model config...")
