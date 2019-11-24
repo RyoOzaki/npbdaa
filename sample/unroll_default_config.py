@@ -6,13 +6,11 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 argparser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
 
-argparser.add_argument("--train_data", type=Path, required=True)
 argparser.add_argument("--default_config", type=Path, default="hypparams/defaults.config")
 argparser.add_argument("--output_dir", type=Path, default="hypparams")
 
 args = argparser.parse_args()
 
-train_data_keys = sorted(list(np.load(args.train_data).keys()))
 default_config_file = args.default_config
 config_root = args.output_dir
 
