@@ -1,4 +1,3 @@
-import os
 import numpy as np
 from pyhlm.model import WeakLimitHDPHLM, WeakLimitHDPHLMPython
 from pyhlm.internals.hlm_states import WeakLimitHDPHLMStates
@@ -8,27 +7,29 @@ import warnings
 from tqdm import trange
 warnings.filterwarnings('ignore')
 import time
-from argparse import ArgumentParser
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from util.config_parser import ConfigParser_with_eval
 from pathlib import Path
 
 #%% parse arguments
-default_hypparams_model = "hypparams/model.config"
-default_hypparams_letter_duration = "hypparams/letter_duration.config"
-default_hypparams_letter_hsmm = "hypparams/letter_hsmm.config"
-default_hypparams_letter_observation = "hypparams/letter_observation.config"
-default_hypparams_pyhlm = "hypparams/pyhlm.config"
-default_hypparams_word_length = "hypparams/word_length.config"
-default_hypparams_superstate = "hypparams/superstate.config"
+hypparams_model = "hypparams/model.config"
+hypparams_letter_duration = "hypparams/letter_duration.config"
+hypparams_letter_hsmm = "hypparams/letter_hsmm.config"
+hypparams_letter_observation = "hypparams/letter_observation.config"
+hypparams_pyhlm = "hypparams/pyhlm.config"
+hypparams_word_length = "hypparams/word_length.config"
+hypparams_superstate = "hypparams/superstate.config"
 
-parser = ArgumentParser()
-parser.add_argument("--model", default=default_hypparams_model, help=f"hyper parameters of model, default is [{default_hypparams_model}]")
-parser.add_argument("--letter_duration", default=default_hypparams_letter_duration, help=f"hyper parameters of letter duration, default is [{default_hypparams_letter_duration}]")
-parser.add_argument("--letter_hsmm", default=default_hypparams_letter_hsmm, help=f"hyper parameters of letter HSMM, default is [{default_hypparams_letter_hsmm}]")
-parser.add_argument("--letter_observation", default=default_hypparams_letter_observation, help=f"hyper parameters of letter observation, default is [{default_hypparams_letter_observation}]")
-parser.add_argument("--pyhlm", default=default_hypparams_pyhlm, help=f"hyper parameters of pyhlm, default is [{default_hypparams_pyhlm}]")
-parser.add_argument("--word_length", default=default_hypparams_word_length, help=f"hyper parameters of word length, default is [{default_hypparams_word_length}]")
-parser.add_argument("--superstate", default=default_hypparams_superstate, help=f"hyper parameters of superstate, default is [{default_hypparams_superstate}]")
+parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+
+parser.add_argument("--model", default=hypparams_model, help="hyper parameters of model")
+parser.add_argument("--letter_duration", default=hypparams_letter_duration, help="hyper parameters of letter duration")
+parser.add_argument("--letter_hsmm", default=hypparams_letter_hsmm, help="hyper parameters of letter HSMM")
+parser.add_argument("--letter_observation", default=hypparams_letter_observation, help="hyper parameters of letter observation")
+parser.add_argument("--pyhlm", default=hypparams_pyhlm, help="hyper parameters of pyhlm")
+parser.add_argument("--word_length", default=hypparams_word_length, help="hyper parameters of word length")
+parser.add_argument("--superstate", default=hypparams_superstate, help="hyper parameters of superstate")
+
 args = parser.parse_args()
 
 hypparams_model = args.model
@@ -65,11 +66,11 @@ def save_stateseq(model):
     names = np.loadtxt("files.txt", dtype=str)
     for i, s in enumerate(model.states_list):
         with open("results/" + names[i] + "_s.txt", "a") as f:
-            np.savetxt(f, s.stateseq)
+            np.savetxt(f, s.stateseq, fmt="%d")
         with open("results/" + names[i] + "_l.txt", "a") as f:
-            np.savetxt(f, s.letter_stateseq)
+            np.savetxt(f, s.letter_stateseq, fmt="%d")
         with open("results/" + names[i] + "_d.txt", "a") as f:
-            np.savetxt(f, unpack_durations(s.durations_censored))
+            np.savetxt(f, unpack_durations(s.durations_censored), fmt="%d")
 
 def save_params_as_text(itr_idx, model):
     with open("parameters/ITR_{0:04d}.txt".format(itr_idx), "w") as f:
@@ -152,14 +153,9 @@ def save_resample_times(resample_time):
         f.write(str(resample_time) + "\n")
 
 #%%
-if not os.path.exists('results'):
-    os.mkdir('results')
-
-if not os.path.exists('parameters'):
-    os.mkdir('parameters')
-
-if not os.path.exists('summary_files'):
-    os.mkdir('summary_files')
+Path("results").mkdir(exist_ok=True)
+Path("parameters").mkdir(exist_ok=True)
+Path("summary_files").mkdir(exist_ok=True)
 
 #%% config parse
 config_parser = load_config(hypparams_model)
@@ -232,7 +228,7 @@ for t in trange(train_iter):
     # save_params_as_file(t+1, model)
     save_params_as_npz(t+1, model)
     save_resample_times(resample_model_time)
-    # print(model.word_list)
-    # print(model.word_counts())
+    print(model.word_list)
+    print(model.word_counts())
     print(f"log_likelihood:{model.log_likelihood()}")
     print(f"resample_model:{resample_model_time}")

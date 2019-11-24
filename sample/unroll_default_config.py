@@ -1,22 +1,26 @@
 import numpy
 from configparser import ConfigParser, ExtendedInterpolation
-import sys
+import numpy as np
 from pathlib import Path
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
-config_file = "hypparams/defaults.config"
-if len(sys.argv) >= 2:
-    config_file = sys.argv[1]
+argparser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
 
-target_dir = "hypparams"
-if len(sys.argv) >= 3:
-    target_dir = sys.argv[2]
+argparser.add_argument("--train_data", type=Path, required=True)
+argparser.add_argument("--default_config", type=Path, default="hypparams/defaults.config")
+argparser.add_argument("--output_dir", type=Path, default="hypparams")
 
-# ready the temp vars
-config_root = Path(target_dir)
+args = argparser.parse_args()
+
+train_data_keys = sorted(list(np.load(args.train_data).keys()))
+default_config_file = args.default_config
+config_root = args.output_dir
+
+config_root.mkdir(exist_ok=True, parents=True)
 
 # load default config
 parser = ConfigParser(interpolation=ExtendedInterpolation())
-parser.read(config_file)
+parser.read(default_config_file)
 
 letter_num = parser.getint("model", "letter_num")
 
