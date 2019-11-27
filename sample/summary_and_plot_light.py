@@ -160,5 +160,4 @@ np.savetxt("summary_files/Letter_micro_F1_score.txt", letter_micro_f1_score)
 np.savetxt("summary_files/Word_ARI.txt", word_ARI)
 np.savetxt("summary_files/Word_macro_F1_score.txt", word_macro_f1_score)
 np.savetxt("summary_files/Word_micro_F1_score.txt", word_micro_f1_score)
-with open("summary_files/Sum_of_resample_times.txt", "w") as f:
-    f.write(str(np.sum(resample_times)))
+np.savetxt("summary_files/Sum_of_resample_times.txt", resample_times.sum())

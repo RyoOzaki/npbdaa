@@ -3,8 +3,8 @@ from pyhlm.model import WeakLimitHDPHLM, WeakLimitHDPHLMPython
 from pyhlm.internals.hlm_states import WeakLimitHDPHLMStates
 from pyhlm.word_model import LetterHSMM, LetterHSMMPython
 import pyhsmm
-import warnings
 from tqdm import trange
+import warnings
 warnings.filterwarnings('ignore')
 import time
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
@@ -57,7 +57,7 @@ def load_datas():
 
 def unpack_durations(dur):
     unpacked = np.zeros(dur.sum())
-    d = np.cumsum(dur[:-1])
+    d = np.cumsum(dur)
     unpacked[d-1] = 1.0
     return unpacked
 
@@ -165,7 +165,7 @@ pretrain_iter   = section["pretrain_iter"]
 train_iter      = section["train_iter"]
 word_num        = section["word_num"]
 letter_num      = section["letter_num"]
-observation_dim = ["observation_dim"]
+observation_dim = section["observation_dim"]
 
 hlm_hypparams = load_config(hypparams_pyhlm)["pyhlm"]
 
