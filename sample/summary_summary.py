@@ -1,26 +1,27 @@
 #%%
-import sys
-import os
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy.stats as stats
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from pathlib import Path
+import re
 
 #%%
-label = sys.argv[1]
-dirs = sys.argv[2:]
-dirs.sort()
+parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+parser.add_argument("--result_dir", type=Path, required=True)
+args = parser.parse_args()
 
 #%%
-if not os.path.exists("figures"):
-    os.mkdir("figures")
+dirs = [dir for dir in args.result_dir.iterdir() if dir.is_dir() and re.match(r"^[0-9]+$", dir.stem)]
+dirs.sort(key=lambda dir: dir.stem)
 
-if not os.path.exists("summary_files"):
-    os.mkdir("summary_files")
+#%%
+Path("figures").mkdir(exist_ok=True)
+Path("summary_files").mkdir(exist_ok=True)
 
 #%%
 print("Initialize variables....")
 N = len(dirs)
-tmp = np.loadtxt(f"{label}/{dirs[0]}/summary_files/resample_times.txt")
+tmp = np.loadtxt(dirs[0] / "summary_files/resample_times.txt")
 T = tmp.shape[0]
 
 resample_times = np.empty((N, T))
@@ -39,15 +40,15 @@ print("Done!")
 
 #%%
 print("Loading results....")
-for i, path in enumerate(dirs):
-    resample_times[i] = np.loadtxt(f"{label}/{path}/summary_files/resample_times.txt")
-    log_likelihoods[i] = np.loadtxt(f"{label}/{path}/summary_files/log_likelihood.txt")
-    letter_ARIs[i] = np.loadtxt(f"{label}/{path}/summary_files/Letter_ARI.txt")
-    letter_macro_f1_scores[i] = np.loadtxt(f"{label}/{path}/summary_files/Letter_macro_F1_score.txt")
-    letter_micro_f1_scores[i] = np.loadtxt(f"{label}/{path}/summary_files/Letter_micro_F1_score.txt")
-    word_ARIs[i] = np.loadtxt(f"{label}/{path}/summary_files/Word_ARI.txt")
-    word_macro_f1_scores[i] = np.loadtxt(f"{label}/{path}/summary_files/Word_macro_F1_score.txt")
-    word_micro_f1_scores[i] = np.loadtxt(f"{label}/{path}/summary_files/Word_micro_F1_score.txt")
+for i, dir in enumerate(dirs):
+    resample_times[i] = np.loadtxt(dir / "summary_files/resample_times.txt")
+    log_likelihoods[i] = np.loadtxt(dir / "summary_files/log_likelihood.txt")
+    letter_ARIs[i] = np.loadtxt(dir / "summary_files/Letter_ARI.txt")
+    letter_macro_f1_scores[i] = np.loadtxt(dir / "summary_files/Letter_macro_F1_score.txt")
+    letter_micro_f1_scores[i] = np.loadtxt(dir / "summary_files/Letter_micro_F1_score.txt")
+    word_ARIs[i] = np.loadtxt(dir / "summary_files/Word_ARI.txt")
+    word_macro_f1_scores[i] = np.loadtxt(dir / "summary_files/Word_macro_F1_score.txt")
+    word_micro_f1_scores[i] = np.loadtxt(dir / "summary_files/Word_micro_F1_score.txt")
 
 print("Done!")
 
@@ -93,24 +94,6 @@ plt.ylabel("Micro F1 score")
 plt.title("Transitions of the micro F1 score")
 plt.legend()
 plt.savefig("figures/summary_of_micro_F1_score.png")
-
-plt.clf()
-ll = log_likelihoods[:, -1]
-lARI = letter_ARIs[:, -1]
-wARI = word_ARIs[:, -1]
-letter_slope, letter_intercept, letter_r_value, _, _ = stats.linregress(ll, lARI)
-word_slope, word_intercept, word_r_value, _, _ = stats.linregress(ll, wARI)
-plt.plot(ll, lARI, ".", color="tab:orange")
-plt.plot(ll, wARI, ".", color="tab:blue")
-left, right = plt.xlim()
-left_and_right = np.array([left, right])
-plt.plot(left_and_right, left_and_right*letter_slope+letter_intercept, "--", color="tab:orange", label=f"letter correlation:{letter_r_value:.3f}")
-plt.plot(left_and_right, left_and_right*word_slope+word_intercept, "--", color="tab:blue", label=f"word correlation:{word_r_value:.3f}")
-plt.xlabel("Log-likelihood")
-plt.ylabel("Adjusted Rand index")
-plt.title("Correlation between log-likelihood and ARI")
-plt.legend()
-plt.savefig("figures/correlation.png")
 print("Done!")
 
 #%%
