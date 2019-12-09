@@ -1,13 +1,13 @@
 #!/bin/bash
 
-killpstree(){
-  kill -SIGSTOP $1
-  children=`ps --ppid $1 --no-heading | awk '{ print $1 }'`
-  for child in $children
-  do
-      killpstree $child
-  done
-  kill -SIGINT $1
+killtree() {
+    local _pid=$1
+    local _sig=${2:--TERM}
+    kill -stop ${_pid} # needed to stop quickly forking parent from producing children between child killing and parent killing
+    for _child in $(ps -o pid --no-headers --ppid ${_pid}); do
+        killtree ${_child} ${_sig}
+    done
+    kill -${_sig} ${_pid}
 }
 
 INTERVAL=300 # sec
@@ -54,7 +54,7 @@ PID=$!
 echo "done!" >> ${WATCHDOG_LOG}
 echo "PID=${PID}" >> ${WATCHDOG_LOG}
 
-trap 'echo "shutdown watchdog" >> ${WATCHDOG_LOG}; killpstree ${PID}; exit 1'  1 2 3 15
+trap 'echo "shutdown watchdog" >> ${WATCHDOG_LOG}; killtree ${PID}; exit 1'  1 2 3 15
 
 sleep ${INTERVAL}
 
@@ -66,7 +66,7 @@ while [ `ps -a | grep "${PID}" -o` ] ; do
     last=$current
   else
     echo -n "shutdown process ${PID}..." >> ${WATCHDOG_LOG}
-    killpstree ${PID}
+    killtree ${PID}
     echo "done!" >> ${WATCHDOG_LOG}
     echo -n "rebooting process..." >> ${WATCHDOG_LOG}
     sh continue.sh &
