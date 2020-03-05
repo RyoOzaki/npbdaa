@@ -34,7 +34,7 @@ do
   touch log.txt
 
   echo "#!/bin/bash" > continue.sh
-  echo "sh runner.sh -l ${label} -b ${i} -e ${end}" >> continue.sh
+  echo "bash runner.sh -l ${label} -b ${i} -e ${end}" >> continue.sh
 
   python pyhlm_sample.py | tee log.txt
 

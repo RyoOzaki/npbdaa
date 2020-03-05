@@ -1,13 +1,15 @@
 #!/bin/bash
 
-killtree() {
-    local _pid=$1
-    local _sig=${2:-KILL}
-    kill -stop ${_pid} # needed to stop quickly forking parent from producing children between child killing and parent killing
-    for _child in $(ps -o pid --no-headers --ppid ${_pid}); do
-        killtree ${_child} ${_sig}
-    done
-    kill -${_sig} ${_pid}
+list_descendants ()
+{
+  local children=$(ps -o pid= --ppid "$1")
+
+  for pid in $children
+  do
+    list_descendants "$pid"
+  done
+
+  echo "$children"
 }
 
 INTERVAL=300 # sec
@@ -30,7 +32,7 @@ do
 done
 
 echo "start-up watchdog" >> ${WATCHDOG_LOG}
-echo "--ITERVAL=${INTERVAL}" >> ${WATCHDOG_LOG}
+echo "--INTERVAL=${INTERVAL}" >> ${WATCHDOG_LOG}
 echo "--TARGET=${TARGET}" >> ${WATCHDOG_LOG}
 if "${CONTINUE}" ; then
   echo "--CONTINUE mode" >> ${WATCHDOG_LOG}
@@ -46,15 +48,16 @@ last=`ls --full-time ${TARGET} | awk '{print $6"-"$7}'`
 
 echo -n "start process..." >> ${WATCHDOG_LOG}
 if "${CONTINUE}" ; then
-  sh continue.sh &
+  bash continue.sh &
 else
-  sh runner.sh -l ${label} -b ${begin} -e ${end} &
+  bash runner.sh -l ${label} -b ${begin} -e ${end} &
 fi
 PID=$!
 echo "done!" >> ${WATCHDOG_LOG}
 echo "PID=${PID}" >> ${WATCHDOG_LOG}
 
-trap 'echo "shutdown watchdog" >> ${WATCHDOG_LOG}; killtree ${PID}; exit 1'  1 2 3 15
+trap 'echo "shutdown watchdog" >> ${WATCHDOG_LOG}; kill $(list_descendants ${PID}); kill ${PID}; exit 1' 1 2 3 15
+# trap 'echo "shutdown watchdog" >> ${WATCHDOG_LOG}; kill -- -${PID}; exit 1' 1 2 3 15
 
 sleep ${INTERVAL}
 
@@ -66,10 +69,12 @@ while [ `ps -a | grep "${PID}" -o` ] ; do
     last=$current
   else
     echo -n "shutdown process ${PID}..." >> ${WATCHDOG_LOG}
-    killtree ${PID}
+    kill $(list_descendants ${PID})
+    kill ${PID}
+    # kill -- -${PID}
     echo "done!" >> ${WATCHDOG_LOG}
     echo -n "rebooting process..." >> ${WATCHDOG_LOG}
-    sh continue.sh &
+    bash continue.sh &
     PID=$!
     echo "done!" >> ${WATCHDOG_LOG}
     echo "PID=${PID}" >> ${WATCHDOG_LOG}
