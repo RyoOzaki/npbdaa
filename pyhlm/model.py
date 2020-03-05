@@ -1,7 +1,7 @@
 import numpy as np
 
 from pyhsmm.util.general import list_split
-from pyhsmm.util.stats import sample_discrete
+from pyhsmm.util.stats import sample_discrete_from_log
 from pyhsmm.internals.transitions import WeakLimitHDPHMMTransitions
 from pyhsmm.internals.initial_state import HMMInitialState
 
@@ -195,8 +195,7 @@ class WeakLimitHDPHLMPython(object):
             cache_scores_matrix[i, i] = 0.0
         scores = cache_scores_matrix.sum(axis=1) + likelihoods
 
-        assert (np.exp(scores) >= 0).all(), cache_scores_matrix
-        sampled_candi_idx = sample_discrete(np.exp(scores))
+        sampled_candi_idx = sample_discrete_from_log(scores)
         return candidates[sampled_candi_idx]
 
     def resample_length_distn(self):
