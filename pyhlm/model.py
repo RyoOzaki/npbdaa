@@ -115,11 +115,12 @@ class WeakLimitHDPHLMPython(object):
 
     def resample_states(self, num_procs=0):
         if num_procs == 0:
-            [state.resample() for state in self.states_list]
+            for state in self.states_list:
+                state.resample()
         else:
             self._joblib_resample_states(self.states_list, num_procs)
 
-    def _joblib_resample_states(self,states_list, num_procs):
+    def _joblib_resample_states(self, states_list, num_procs):
         from joblib import Parallel, delayed
         from . import parallel
 
