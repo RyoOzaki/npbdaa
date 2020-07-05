@@ -19,6 +19,7 @@ An inference procedure for the HDP-HLM is derived using the blocked Gibbs sample
 + tqdm 4.23.4
 + pybasicbayes 0.2.2
 + pyhsmm 0.1.6
++ pytest
 
 # Installation instructions
 1. Install GNU compiler collection to use Cython.
