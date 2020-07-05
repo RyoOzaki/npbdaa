@@ -51,6 +51,8 @@ But, the master repository's codes include some bugs in cython codes.
 $ git clone https://github.com/RyoOzaki/npbdaa npbdaa
 $ cd npbdaa
 $ python setup.py install
+$ python setup.py build_ext --inplace # if you want to use PyCharm, then you shod compile them
+$ # See https://geoexamples.com/python/2017/04/20/pycharm-cython.html
 ```
 
 # Sample source
