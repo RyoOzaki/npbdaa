@@ -159,13 +159,14 @@ def main():
     # Parse configs such as hyper parameters
     config_parser = load_config(hypparams_model)
     section = config_parser["model"]  # it has some sections
-    thread_num = section["thread_num"]
-    pretrain_iter = section["pretrain_iter"]
-    train_iter = section["train_iter"]
-    word_num = section["word_num"]
-    letter_num = section["letter_num"]
+    thread_num: int = section["thread_num"]
+    pretrain_iter: int = section["pretrain_iter"]
+    train_iter: int = section["train_iter"]
+    word_num: int = section["word_num"]
+    letter_num: int = section["letter_num"]
     observation_dim = section["observation_dim"]
 
+    # コンフィグ(Sectionというクラス. dictのように使える)だけを返す.
     hlm_hypparams = load_config(hypparams_pyhlm)["pyhlm"]
 
     config_parser = load_config(hypparams_letter_observation)
@@ -174,24 +175,49 @@ def main():
     config_parser = load_config(hypparams_letter_duration)
     dur_hypparams = [config_parser[f"{i + 1}_th"] for i in range(letter_num)]
 
-    ## MODEL
     len_hypparams = load_config(hypparams_word_length)["word_length"]
 
-    ## MODEL
     letter_hsmm_hypparams = load_config(hypparams_letter_hsmm)["letter_hsmm"]
 
-    ## MODEL
     superstate_config = load_config(hypparams_superstate)
 
     # Make instance of distributions and models
     letter_obs_distns = [pyhsmm.distributions.Gaussian(**hypparam) for hypparam in obs_hypparams]
-    letter_dur_distns = [pyhsmm.distributions.PoissonDuration(**hypparam) for hypparam in dur_hypparams]
-    dur_distns = [pyhsmm.distributions.PoissonDuration(lmbda=20) for _ in range(word_num)]
-    length_distn = pyhsmm.distributions.PoissonDuration(**len_hypparams)
+    letter_dur_distns = [pyhsmm.distributions.PoissonDuration(**hypparam) for hypparam in dur_hypparams]  # Argが変？
+    dur_distns = [pyhsmm.distributions.PoissonDuration(lmbda=20) for _ in range(word_num)]  # Argが変？
+    length_distn = pyhsmm.distributions.PoissonDuration(**len_hypparams)  # Argが変？
 
     letter_hsmm = LetterHSMM(**letter_hsmm_hypparams, obs_distns=letter_obs_distns, dur_distns=letter_dur_distns)
     model = WeakLimitHDPHLM(**hlm_hypparams, letter_hsmm=letter_hsmm, dur_distns=dur_distns, length_distn=length_distn)
 
+    # TODO: 要は何をすれば良いのか、の記述
+    #   1. セットアップ
+    #       a. プロジェクトのクローン
+    #       b. 各種ライブラリの導入
+    #       c. optional: PyCharmなどを使う場合は Cython のコンパイル
+    #   2. データの配置 (sample/DATA/.)
+    #       a. データは一つの観測 (e.g. aioi_aioi) で得た (m, n_feature) の行列
+    #          ただし、その行列は txt として export される。
+    #          FYI: file name にはセグメントとワードを書いてある (e.g. aioi_aioi.txt)
+    #       c. 学習する txt のリストを `files.txt` として配置 (sample/.)
+    #   3. ハイパーパラメータを設定
+    #       a. 必要に応じて `default.config` の以下を更新:
+    #          model, pyhlm, letter_observation, letter_duration, letter_hsmm, superstate, word_length
+    #       b. `unroll_default_config.py` を使って展開 (各ファイル名はよしなにつけてくれる)
+    #   4. `pyhlm_sample.py` (あるいは simple_pyhlm_sample.py) を実行
+    #       a. よしなに学習をすすめてくれる模様
+    #   5. `summary_and_plot.py` を実行
+    #       a. load model config -> plot results -> ARI の計算などなど
+    #       a. DAAのletterとsegmentのアノテーションの図がそれぞれ `<label>_l.png` と `<label>_s.png` に書き出される
+    #          FYI: Path モジュールの `import` が無いように見える (c.f. https://github.com/RyoOzaki/npbdaa/pull/2/files)
+    #          FYI: `Log_likelihood.png` の生成は ValueError を起こす
+    # TODO: 質問
+    #   1. 分析/報告の手順
+    #       a. Aと同様、A
+    #       b. Bと同様、B
+    #       c. その他
+    #   1. 分析にベースラインとの比較が含まれる場合(b/c)、妥当なベースライン
+    #   1. 上の3のハイパーパラメータを設定するステップに関するドキュメントは存在するか
     # %%
     files = np.loadtxt("files.txt", dtype=str)
     datas = load_datas()
@@ -199,7 +225,7 @@ def main():
     # %% Pre training.
     for data in datas:
         letter_hsmm.add_data(data, **superstate_config["DEFAULT"])
-    for t in trange(pretrain_iter):
+    for t in trange(pretrain_iter): # t: 0
         letter_hsmm.resample_model(num_procs=thread_num)
     letter_hsmm.states_list = []
 
