@@ -175,17 +175,23 @@ print("Done!")
 plt.clf()
 plt.title("Letter ARI")
 plt.plot(range(train_iter), letter_ARI, ".-")
+plt.savefig("figures/Letter_ARI.png")
 
 #%%
+plt.clf()
 plt.title("Word ARI")
-plt.clf()
 plt.plot(range(train_iter), word_ARI, ".-")
+plt.savefig("figures/Word_ARI.png")
 
 #%%
-plt.clf()
-plt.title("Log likelihood")
-plt.plot(range(train_iter+1), log_likelihood, ".-")
-plt.savefig("figures/Log_likelihood.png")
+try:
+    plt.clf()
+    plt.title("Log likelihood")
+    # FIXME below: ValueError: x and y must have same first dimension, but have shapes (143,) and (154,)
+    plt.plot(range(train_iter+1), log_likelihood, ".-")
+    plt.savefig("figures/Log_likelihood.png")
+except ValueError:
+    print("figures/Log_likelihood.png is not depicted due to a ValueError")
 
 #%%
 plt.clf()
