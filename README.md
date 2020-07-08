@@ -87,7 +87,7 @@ $ python summary_and_plot.py
 5. `summary_and_plot.py` を実行
     1. load model config -> plot results -> ARI の計算などなど
     1. DAAのletterとsegmentのアノテーションの図がそれぞれ `<label>_l.png` と `<label>_s.png` に書き出される
-        * FYI: Path モジュールの `import` が無いように見える (c.f. https://github.com/RyoOzaki/npbdaa/pull/2/files)
+        * FYI: Path モジュールの `import` が無いように見える (cf. https://github.com/RyoOzaki/npbdaa/pull/2/files)
         * FYI: `Log_likelihood.png` の生成は ValueError を起こす
 
 ### 質問
